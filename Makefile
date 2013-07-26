@@ -9,7 +9,7 @@ CPP_SRC = \
 	main.cpp \
 	pdbhelper.cpp \
 	pdbatom.cpp \
-	Genfig/genfig.cpp \
+	genfig/genfig.cpp \
 	vmdhelper.cpp
 
 CPP_SRC_OBJS = $(CPP_SRC:.cpp=.o)

@@ -1,4 +1,4 @@
-#include "Genfig/genfig.h"
+#include "genfig/genfig.h"
 #include "pdbhelper.h"
 #include "vmdhelper.h"
 
