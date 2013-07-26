@@ -1,0 +1,3 @@
+[submodule "genfig"]
+	path = genfig
+	url = git@github.com:collinprice/Genfig.git
