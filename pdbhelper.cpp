@@ -13,8 +13,6 @@ PDBHelper::PDBHelper(std::string pdb_file, std::string amber_topology_file) {
 	read_pdb(C_TEXT(pdb_file));
 	read_parm7(C_TEXT(amber_topology_file)); // Restore reliable atom names
 	mass_to_element();
-
-	write_one_pdb(C_TEXT("test.txt"));
 }
 
 int PDBHelper::numberOfAtoms() {

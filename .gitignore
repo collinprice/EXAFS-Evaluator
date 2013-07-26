@@ -11,3 +11,8 @@
 *.lai
 *.la
 *.a
+
+# Project files
+main
+oec/energy_script.vmd
+oec/pdb_energy

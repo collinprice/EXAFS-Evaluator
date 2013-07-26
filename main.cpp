@@ -1,6 +1,6 @@
-
-#include "pdbhelper.h"
 #include "Genfig/genfig.h"
+#include "pdbhelper.h"
+#include "vmdhelper.h"
 
 #include <iostream>
 #include <string>
@@ -34,16 +34,10 @@ int main(int argc, char **argv) {
 		srand(time(NULL));
 	}
 
-	PDBHelper helper(std::string("relaxed-H.pdb"), std::string("prmtop-sphere"));
+	// PDBHelper helper(std::string("relaxed-H.pdb"), std::string("prmtop-sphere"));
 
-	std::cout << helper.numberOfAtoms() << std::endl;
+	VMDHelper vmd_helper(config.getString("pdb-file"),config.getString("amber-topology-file"),config.getString("namd2-path"),config.getString("vmd-path"));
+	// std::cout << vmd_helper.calculateEnergy() << std::endl;
 
-	helper.writePDBFile("tester.txt");
-
-	std::vector<PDBAtom> atoms = helper.getEXAFSAtoms();
-	atoms[0].x = 100;
-	helper.updateEXAFSAtoms(atoms);
-	helper.writePDBFile("tester2.txt");
-	
 	return 0;
 }

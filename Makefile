@@ -3,15 +3,21 @@ CXX = g++
 
 CXXFLAGS = -c -std=c++0x -pthread -g -Wall -Wextra -pedantic -DDEBUG=1
 CCFLAGS = -c
-LDFLAGS=-lpthread
+LDFLAGS = -lpthread
 
-CPP_SRC = main.cpp pdbhelper.cpp pdbatom.cpp Genfig/genfig.cpp
+CPP_SRC = \
+	main.cpp \
+	pdbhelper.cpp \
+	pdbatom.cpp \
+	Genfig/genfig.cpp \
+	vmdhelper.cpp
+
 CPP_SRC_OBJS = $(CPP_SRC:.cpp=.o)
 
 CC_SRC = file_read_write.c
 CC_SRC_OBJS = $(CC_SRC:.c=.o)
 
-EXECUTABLE=main
+EXECUTABLE = main
 
 all: $(SOURCES) $(EXECUTABLE)
 	

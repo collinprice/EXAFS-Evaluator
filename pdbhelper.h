@@ -7,7 +7,6 @@ class PDBHelper {
 
 public:
 	PDBHelper(std::string pdb_file, std::string amber_topology_file);
-	// ~PDBHelper();
 
 	int numberOfAtoms();
 	std::string atomAtIndex(int index);
