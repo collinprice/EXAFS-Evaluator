@@ -1,0 +1,6 @@
+package require namdenergy
+mol new prmtop-sphere type parm7 
+mol addfile test.pdb
+set sel [atomselect top "occupancy 1.0"]
+namdenergy -all -sel $sel -exe namd2 -ofile energy
+quit
