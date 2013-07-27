@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <string.h>
 
@@ -13,6 +14,9 @@ public:
 	PDBAtom(std::string atomic_symbol, int index, double x, double y, double z);
 	int getAtomicNumber();
 	int getIndex();
+
+	static std::string atomicNumberToSymbol(int atomic_number);
+	static int atomicSymbolToNumber(std::string atomic_symbol);
 
 private:
 

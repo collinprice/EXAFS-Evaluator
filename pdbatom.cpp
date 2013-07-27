@@ -23,6 +23,20 @@ int PDBAtom::getIndex() {
 	return this->index;
 }
 
+std::string PDBAtom::atomicNumberToSymbol(int atomic_number) {
+	return PDBAtom::periodic_table[atomic_number-1];
+}
+
+int PDBAtom::atomicSymbolToNumber(std::string atomic_symbol) {
+	for (int i = 0; i < PDBAtom::periodic_table_size; ++i) {
+		if (strcmp(PDBAtom::periodic_table[i], atomic_symbol.c_str()) == 0) {
+			return (i+1);
+		}
+	}
+
+	return -1;
+}
+
 const char* PDBAtom::periodic_table[] = {
 	"H", "He","Li","Be","B", "C", "N", "O", "F", "Ne",
 	"Na","Mg","Al","Si","P", "S", "Cl","Ar","K", "Ca",

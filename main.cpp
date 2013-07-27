@@ -1,6 +1,7 @@
 #include "genfig/genfig.h"
 #include "pdbhelper.h"
 #include "vmdhelper.h"
+#include "ifeffithelper.h"
 
 #include <iostream>
 #include <string>
@@ -34,10 +35,15 @@ int main(int argc, char **argv) {
 		srand(time(NULL));
 	}
 
-	// PDBHelper helper(std::string("relaxed-H.pdb"), std::string("prmtop-sphere"));
+	PDBHelper helper(config.getString("pdb-file"), config.getString("amber-topology-file"));
+	std::vector<PDBAtom> original_atoms = helper.getEXAFSAtoms();
+
+	IFEFFITHelper ifeffit_helper(original_atoms, config.getString("target-atom"), config.getString("experimental-exafs"), config.getFloat("x-min"), config.getFloat("x-max"), config.getString("feff"), config.getString("ifeffit"));
+	std::cout << ifeffit_helper.run(original_atoms, true) << std::endl;
+	ifeffit_helper.clean();
 
 	VMDHelper vmd_helper(config.getString("pdb-file"),config.getString("amber-topology-file"),config.getString("namd2-path"),config.getString("vmd-path"));
-	// std::cout << vmd_helper.calculateEnergy() << std::endl;
+	std::cout << vmd_helper.calculateEnergy() << std::endl;
 
 	return 0;
 }

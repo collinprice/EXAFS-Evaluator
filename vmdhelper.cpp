@@ -33,5 +33,8 @@ float VMDHelper::calculateEnergy() {
 		energy_file >> line;
 	}
 
+	// Clean up
+	system(("rm " + VMDHelper::ENERGY_OUTPUT).c_str());
+
 	return atof(line.c_str());
 }

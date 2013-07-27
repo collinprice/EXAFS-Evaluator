@@ -10,7 +10,8 @@ CPP_SRC = \
 	pdbhelper.cpp \
 	pdbatom.cpp \
 	genfig/genfig.cpp \
-	vmdhelper.cpp
+	vmdhelper.cpp \
+	ifeffithelper.cpp
 
 CPP_SRC_OBJS = $(CPP_SRC:.cpp=.o)
 
