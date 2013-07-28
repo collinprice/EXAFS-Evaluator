@@ -1,7 +1,5 @@
 #include "genfig/genfig.h"
-#include "pdbhelper.h"
-#include "vmdhelper.h"
-#include "ifeffithelper.h"
+#include "exafsevaluator.h"
 
 #include <iostream>
 #include <string>
@@ -35,15 +33,11 @@ int main(int argc, char **argv) {
 		srand(time(NULL));
 	}
 
-	PDBHelper helper(config.getString("pdb-file"), config.getString("amber-topology-file"));
-	std::vector<PDBAtom> original_atoms = helper.getEXAFSAtoms();
+	PDBHelper* pdb_helper = new PDBHelper(config.getString("pdb-file"), config.getString("amber-topology-file"), "temp_pdb.pdb");
+	IFEFFITHelper* ifeffit_helper = new IFEFFITHelper(pdb_helper->getEXAFSAtoms(), config.getString("target-atom"), config.getString("experimental-exafs"), config.getFloat("x-min"), config.getFloat("x-max"), config.getString("feff"), config.getString("ifeffit"));
+	VMDHelper* vmd_helper = new VMDHelper(pdb_helper->output_pdb_file, config.getString("amber-topology-file"), config.getString("namd2-path"), config.getString("vmd-path"));
 
-	IFEFFITHelper ifeffit_helper(original_atoms, config.getString("target-atom"), config.getString("experimental-exafs"), config.getFloat("x-min"), config.getFloat("x-max"), config.getString("feff"), config.getString("ifeffit"));
-	std::cout << ifeffit_helper.run(original_atoms, true) << std::endl;
-	ifeffit_helper.clean();
-
-	VMDHelper vmd_helper(config.getString("pdb-file"),config.getString("amber-topology-file"),config.getString("namd2-path"),config.getString("vmd-path"));
-	std::cout << vmd_helper.calculateEnergy() << std::endl;
+	EXAFSEvaluator exafs_evaluator(ifeffit_helper, pdb_helper, vmd_helper);
 
 	return 0;
 }

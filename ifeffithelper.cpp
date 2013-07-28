@@ -218,6 +218,10 @@ IFEFFITHelper::IFEFFITHelper(std::vector<PDBAtom> atoms,
 	this->clean_script();
 }
 
+IFEFFITHelper::~IFEFFITHelper() {
+	this->clean();
+}
+
 double IFEFFITHelper::run(std::vector<PDBAtom> updated_atoms, bool threaded) {
 
 	this->updateFEFFFiles(updated_atoms);

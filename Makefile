@@ -11,7 +11,8 @@ CPP_SRC = \
 	pdbatom.cpp \
 	genfig/genfig.cpp \
 	vmdhelper.cpp \
-	ifeffithelper.cpp
+	ifeffithelper.cpp \
+	exafsevaluator.cpp
 
 CPP_SRC_OBJS = $(CPP_SRC:.cpp=.o)
 

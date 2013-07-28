@@ -20,7 +20,7 @@ VMDHelper::VMDHelper(std::string pdb_file, std::string amber_topology_file, std:
 	this->vmd_path = vmd_path;
 }
 
-float VMDHelper::calculateEnergy() {
+double VMDHelper::calculateEnergy() {
 
 	system((this->vmd_path + " -dispdev text -e " + VMDHelper::VMD_SCRIPT + " > /dev/null").c_str());
 

@@ -8,6 +8,7 @@ class IFEFFITHelper {
 
 public:
 	IFEFFITHelper(std::vector<PDBAtom> atoms, std::string target_atom, std::string target_exafs_filename, double x_min, double x_max, std::string feff_path, std::string ifeffit_path);
+	~IFEFFITHelper();
 	double run(std::vector<PDBAtom> updated_atoms, bool threaded);
 	void clean();
 	
