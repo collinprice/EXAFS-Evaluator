@@ -5,6 +5,7 @@ extern "C" {
 }
 
 #include <iostream>
+#include <fstream>
 
 #define C_TEXT( text ) ((char*)std::string( text ).c_str())
 
@@ -52,6 +53,27 @@ void PDBHelper::updateEXAFSAtoms(std::vector<PDBAtom> atoms) {
 		Y[index] = atom->y;
 		Z[index] = atom->z;
 	}
+}
+
+void PDBHelper::updateAtomsFromXYZ(std::string filename, bool onlyEXAFS) {
+
+	std::ifstream xyz_file(filename.c_str());
+	std::string x,y,z;
+
+	int index = -1;
+	while(xyz_file.good()) {
+
+		xyz_file >> x >> y >> z;
+		++index;
+
+		if (onlyEXAFS && occupancy[index] != 1) continue;
+
+		X[index] = atof(x.c_str());
+		Y[index] = atof(y.c_str());
+		Z[index] = atof(z.c_str());		
+	}
+
+	xyz_file.close();
 }
 
 void PDBHelper::writePDBFile(std::string filename) {

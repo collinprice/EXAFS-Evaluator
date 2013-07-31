@@ -16,6 +16,7 @@ public:
 
 	std::vector<PDBAtom> getEXAFSAtoms();
 	void updateEXAFSAtoms(std::vector<PDBAtom> atoms);
+	void updateAtomsFromXYZ(std::string filename, bool onlyEXAFS);
 	void writePDBFile(std::string filename);
 	void writePDBFile();
 

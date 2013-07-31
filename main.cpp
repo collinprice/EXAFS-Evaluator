@@ -1,9 +1,11 @@
 #include "genfig/genfig.h"
-#include "exafsevaluator.h"
+#include "iohelper/iohelper.h"
+#include "exafsga.h"
 
 #include <iostream>
 #include <string>
 #include <unistd.h>
+#include <memory>
 
 int main(int argc, char **argv) {
 
@@ -37,7 +39,21 @@ int main(int argc, char **argv) {
 	IFEFFITHelper* ifeffit_helper = new IFEFFITHelper(pdb_helper->getEXAFSAtoms(), config.getString("target-atom"), config.getString("experimental-exafs"), config.getFloat("x-min"), config.getFloat("x-max"), config.getString("feff"), config.getString("ifeffit"));
 	VMDHelper* vmd_helper = new VMDHelper(pdb_helper->output_pdb_file, config.getString("amber-topology-file"), config.getString("namd2-path"), config.getString("vmd-path"));
 
-	EXAFSEvaluator exafs_evaluator(ifeffit_helper, pdb_helper, vmd_helper);
+	std::vector<std::string> files = IOHelper::contentsOfFolder(config.getString("initial-population-dir"));
+	std::vector< std::vector<PDBAtom> > initial_population;
+
+	for (std::vector<std::string>::iterator filename = files.begin(); filename != files.end(); ++filename) {
+		
+		std::string file = config.getString("initial-population-dir") + "/" + *filename;
+		pdb_helper->updateAtomsFromXYZ(file, true);
+
+		initial_population.push_back(pdb_helper->getEXAFSAtoms());
+	}
+
+	EXAFSEvaluator* exafs_evaluator = new EXAFSEvaluator(ifeffit_helper, pdb_helper, vmd_helper);
+
+	EXAFSGA ga(exafs_evaluator, config.getFloat("mutation"), config.getFloat("crossover"), config.getBool("elitism"), config.getInt("max-generations"), config.getString("results"));
+	ga.begin(initial_population);
 
 	return 0;
 }

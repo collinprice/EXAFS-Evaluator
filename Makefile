@@ -1,7 +1,7 @@
 CC = gcc
 CXX = g++
 
-CXXFLAGS = -c -std=c++0x -pthread -g -Wall -Wextra -pedantic -DDEBUG=1
+CXXFLAGS = -c -std=c++0x -pthread -g -Wall -Wextra -pedantic #-DDEBUG=1
 CCFLAGS = -c
 LDFLAGS = -lpthread
 
@@ -12,7 +12,10 @@ CPP_SRC = \
 	genfig/genfig.cpp \
 	vmdhelper.cpp \
 	ifeffithelper.cpp \
-	exafsevaluator.cpp
+	exafsevaluator.cpp \
+	iohelper/iohelper.cpp \
+	chromosome.cpp \
+	exafsga.cpp
 
 CPP_SRC_OBJS = $(CPP_SRC:.cpp=.o)
 
