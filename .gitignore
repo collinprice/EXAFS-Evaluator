@@ -24,3 +24,5 @@ oec/*_ifeffit_script.sh
 oec/clean.sh
 oec/results.csv
 oec/xyz
+oec/best_chromosome.pdb
+oec/generation_data.csv

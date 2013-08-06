@@ -44,3 +44,7 @@ std::vector< std::pair<double, double> > EXAFSEvaluator::getTargetEXAFS() {
 
 	return this->ifeffit_helper->getTargetEXAFS();
 }
+
+void EXAFSEvaluator::writePDB(std::string filename) {
+	this->pdb_helper->writePDBFile(filename);
+}

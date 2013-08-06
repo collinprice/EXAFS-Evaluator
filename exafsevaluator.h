@@ -15,6 +15,7 @@ public:
 	double calculatePotentialEnergy();
 	std::vector< std::pair<double, double> > getEXAFSData();
 	std::vector< std::pair<double, double> > getTargetEXAFS();
+	void writePDB(std::string filename);
 
 private:
 

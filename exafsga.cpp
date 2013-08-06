@@ -237,4 +237,6 @@ void EXAFSGA::finalStats() {
 	}
 	output.close();
 	
+	this->exafs_evaluator->updateAtoms(this->best_individuals[this->best_individuals.size()-1].atoms);
+	this->exafs_evaluator->writePDB("best_chromosome.pdb");
 }
