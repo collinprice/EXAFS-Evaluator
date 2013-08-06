@@ -21,6 +21,7 @@ class EXAFSGA {
 		int max_generations;
 		std::string results_file;
 		std::ofstream output_stream;
+		std::vector<Chromosome> best_individuals;
 
 		void initPopulation(std::vector< std::vector<PDBAtom> > population);
 
@@ -39,5 +40,5 @@ class EXAFSGA {
 
 		void initStats();
 		void recordStats();
-		void closeStats();
+		void finalStats();
 };

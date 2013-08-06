@@ -2,12 +2,24 @@
 
 Chromosome::Chromosome() {
 
+	this->init();
 }
 
-Chromosome::Chromosome(std::vector<PDBAtom> points) {
+Chromosome::Chromosome( std::vector<PDBAtom> atoms ) {
 
-	for (std::vector<PDBAtom>::iterator point = points.begin(); point != points.end(); ++point) {
-		
-		this->push_back(*point);
-	}
+	this->atoms = atoms;
+	this->init();
+}
+
+Chromosome::Chromosome( const Chromosome& other ) : exafs_score( other.exafs_score ),
+													potential_energy( other.potential_energy ),
+													is_evaluated( other.is_evaluated ),
+													exafs_data( other.exafs_data ),
+													atoms( other.atoms ) {}
+
+void Chromosome::init() {
+
+	this->exafs_score = 0;
+	this->potential_energy = 0;
+	this->is_evaluated = false;
 }

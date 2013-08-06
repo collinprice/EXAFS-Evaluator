@@ -13,6 +13,8 @@ public:
 	void updateAtoms(std::vector<PDBAtom> atoms);
 	double calculateRMSD();
 	double calculatePotentialEnergy();
+	std::vector< std::pair<double, double> > getEXAFSData();
+	std::vector< std::pair<double, double> > getTargetEXAFS();
 
 private:
 

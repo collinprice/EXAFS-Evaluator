@@ -8,10 +8,8 @@
 #include <thread>
 #include <unistd.h>
 #include <math.h>
-
-#ifdef DEBUG
+#include <limits>
 #include <iostream>
-#endif
 
 const std::string IFEFFITHelper::CALCULATED_EXAFS_FILENAME = "my_chi.chi3";
 const std::string IFEFFITHelper::IFEFFIT_SCRIPT = "_ifeffit_script.sh";
@@ -114,17 +112,7 @@ IFEFFITHelper::IFEFFITHelper(std::vector<PDBAtom> atoms,
 		this->cached_header.push_back(feff_mid[i]);
 	}
 
-	#ifdef DEBUG
-	std::cout << "FEFF Header" << std::endl;
-	for (std::vector<std::string>::iterator i = this->cached_header.begin(); i != this->cached_header.end(); ++i) {
-		std::cout << *i << std::endl;
-	}
-	#endif
-
 	// PREPARE
-
-	
-
 	std::string setup_feff_script("feff_setup.sh");
 	std::ofstream feff_setup(setup_feff_script.c_str());
 
@@ -224,17 +212,25 @@ IFEFFITHelper::~IFEFFITHelper() {
 
 double IFEFFITHelper::run(std::vector<PDBAtom> updated_atoms, bool threaded) {
 
+	this->removeAllCalculatedEXAFSFiles(); // Clean up before run.
 	this->updateFEFFFiles(updated_atoms);
 	this->processIFEFFIT(threaded);
 
 	return this->calculateRMSD();
 }
 
+std::vector< std::pair<double, double> > IFEFFITHelper::getEXAFSData() {
+
+	return this->averaged_calculated_data;
+}
+
+std::vector< std::pair<double, double> > IFEFFITHelper::getTargetEXAFS() {
+	return this->cached_target_exafs;
+}
+
 void IFEFFITHelper::clean() {
 	system(("bash " + IFEFFITHelper::CLEAN_SCRIPT).c_str());
 }
-
-
 
 // PRIVATE FUNCTIONS
 
@@ -312,15 +308,8 @@ void IFEFFITHelper::processIFEFFIT(bool threaded) {
 		for (int i = 0; i < (int)this->target_indexes.size(); ++i) {
 			std::ostringstream oss;
 			oss << i;
-
 			std::string bash_string = "bash " + oss.str() + IFEFFITHelper::IFEFFIT_SCRIPT;
 			commands.push_back(bash_string);
-			#ifdef DEBUG
-			std::cout << "Creating: " << bash_string << std::endl;
-			#endif
-
-			oss.clear();
-			oss.str("");
 		}
 
 		for (int i = 0; i < (int)commands.size(); ++i) {
@@ -331,14 +320,11 @@ void IFEFFITHelper::processIFEFFIT(bool threaded) {
 			threads[i].join();
 		}
 	} else {
-		std::ostringstream oss;
+		
 		for (int i = 0; i < (int)this->target_indexes.size(); ++i) {
+			std::ostringstream oss;
 			oss << i;
-
 			system(("bash " + oss.str() + IFEFFITHelper::IFEFFIT_SCRIPT).c_str());
-
-			oss.clear();
-			oss.str("");
 		}
 	}
 	
@@ -349,6 +335,11 @@ void IFEFFITHelper::staticEntry(const char* command) {
 }
 
 double IFEFFITHelper::calculateRMSD() {
+
+	// Check that all output files are there. If there are any missing then ifeffit failed.
+	if (!this->canPerformIFEFFITCalculations()) {
+		return std::numeric_limits<double>::max();
+	}
 
 	// Read in target_indexes output files.
 	// Average all files.
@@ -376,24 +367,24 @@ double IFEFFITHelper::calculateRMSD() {
 		oss.str("");
 	}
 
-	std::vector< std::pair<double, double> > averaged_data;
+	this->averaged_calculated_data.clear();
 
 	// Preload with 0's
 	for (int i = 0; i < (int)calculated_exafs[0].size(); ++i) {
-		averaged_data.push_back( std::make_pair(calculated_exafs[0][i].first, 0) );
+		this->averaged_calculated_data.push_back( std::make_pair(calculated_exafs[0][i].first, 0) );
 	}
 
 	for (int i = 0; i < (int)calculated_exafs.size(); ++i) {
 		for (int j = 0; j < (int)calculated_exafs[i].size(); ++j) {
-			averaged_data[j].second += calculated_exafs[i][j].second;
+			this->averaged_calculated_data[j].second += calculated_exafs[i][j].second;
 		}
 	}
 
-	for (int i = 0; i < (int)averaged_data.size(); ++i) {
-		averaged_data[i].second /= calculated_exafs.size();
+	for (int i = 0; i < (int)this->averaged_calculated_data.size(); ++i) {
+		this->averaged_calculated_data[i].second /= calculated_exafs.size();
 	}
 
-	std::vector< std::pair<double, double> > calc_data = averaged_data;
+	std::vector< std::pair<double, double> > calc_data = this->averaged_calculated_data;
 	std::vector< std::pair<double, double> > exp_data = this->cached_target_exafs;
 
 	double rmsd = 0;
@@ -428,4 +419,34 @@ void IFEFFITHelper::clean_script() {
 	}
 	cleaner << "rm " << IFEFFITHelper::CLEAN_SCRIPT << std::endl;
 	cleaner.close();
+}
+
+bool IFEFFITHelper::canPerformIFEFFITCalculations() {
+
+	bool has_files = true;
+	for (int i = 0; i < (int)this->target_indexes.size(); ++i) {
+		std::ostringstream oss;
+		oss << i;
+		std::string filename = oss.str() + "/" + IFEFFITHelper::CALCULATED_EXAFS_FILENAME;
+		
+		std::ifstream temp_file(filename.c_str());
+		if (!temp_file.good()) {
+			has_files = false;
+			std::cout << "ERROR" << std::endl;
+		} else {
+			temp_file.close();
+		}
+	}
+
+	return has_files;
+}
+
+void IFEFFITHelper::removeAllCalculatedEXAFSFiles() {
+
+	for (int i = 0; i < (int)this->target_indexes.size(); ++i) {
+		std::ostringstream oss;
+		oss << i;
+		std::string filename = oss.str() + "/" + IFEFFITHelper::CALCULATED_EXAFS_FILENAME;
+		remove(filename.c_str());
+	}
 }

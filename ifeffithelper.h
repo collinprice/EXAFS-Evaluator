@@ -10,6 +10,8 @@ public:
 	IFEFFITHelper(std::vector<PDBAtom> atoms, std::string target_atom, std::string target_exafs_filename, double x_min, double x_max, std::string feff_path, std::string ifeffit_path);
 	~IFEFFITHelper();
 	double run(std::vector<PDBAtom> updated_atoms, bool threaded);
+	std::vector< std::pair<double, double> > getEXAFSData();
+	std::vector< std::pair<double, double> > getTargetEXAFS();
 	void clean();
 	
 private:
@@ -23,6 +25,7 @@ private:
 	std::vector<std::string> cached_header;
 	std::vector<std::string> cached_feff_filenames;
 	std::vector< std::pair<double, double> > cached_target_exafs;
+	std::vector< std::pair<double, double> > averaged_calculated_data;
 	double x_min;
 	double x_max;
 
@@ -33,5 +36,8 @@ private:
 	static void staticEntry(const char* command);
 	double calculateRMSD();
 	void clean_script();
+
+	bool canPerformIFEFFITCalculations();
+	void removeAllCalculatedEXAFSFiles();
 
 };

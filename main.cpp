@@ -8,7 +8,7 @@
 #include <memory>
 
 int main(int argc, char **argv) {
-
+	
 	int c;
 	std::string input_file;
 	while ( (c = getopt(argc, argv, "i:")) != -1 ) {
@@ -32,7 +32,9 @@ int main(int argc, char **argv) {
 	if (config.hasKey("seed")) {
 		srand(config.getInt("seed"));
 	} else {
-		srand(time(NULL));
+		time_t inital_seed = time(NULL);
+		srand(inital_seed);
+		std::cout << "Seed: " << inital_seed << std::endl;
 	}
 
 	PDBHelper* pdb_helper = new PDBHelper(config.getString("pdb-file"), config.getString("amber-topology-file"), "temp_pdb.pdb");

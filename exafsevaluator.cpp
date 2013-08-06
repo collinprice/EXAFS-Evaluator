@@ -31,5 +31,16 @@ double EXAFSEvaluator::calculateRMSD() {
 
 double EXAFSEvaluator::calculatePotentialEnergy() {
 
+	this->pdb_helper->writePDBFile();
 	return this->vmd_helper->calculateEnergy();
+}
+
+std::vector< std::pair<double, double> > EXAFSEvaluator::getEXAFSData() {
+
+	return this->ifeffit_helper->getEXAFSData();
+}
+
+std::vector< std::pair<double, double> > EXAFSEvaluator::getTargetEXAFS() {
+
+	return this->ifeffit_helper->getTargetEXAFS();
 }

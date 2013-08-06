@@ -20,7 +20,10 @@ PDBHelper::PDBHelper(std::string pdb_file, std::string amber_topology_file, std:
 
 PDBHelper::~PDBHelper() {
 
-	system(("rm" + this->output_pdb_file).c_str());
+	std::ifstream temp_file(this->output_pdb_file.c_str());
+	if (temp_file.good()) {
+		system(("rm " + this->output_pdb_file).c_str());
+	}
 }
 
 int PDBHelper::numberOfAtoms() {

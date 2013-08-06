@@ -3,6 +3,7 @@
 #include <iostream>
 #include <math.h>
 #include <limits>
+#include <sstream>
 
 EXAFSGA::EXAFSGA(EXAFSEvaluator* exafs_evaluator, double mutation_rate, double crossover_rate, bool elitism, int max_generations, std::string results_file) {
 
@@ -30,10 +31,13 @@ void EXAFSGA::begin(std::vector< std::vector<PDBAtom> > initial_population) {
 	for (int i = 0; i < this->max_generations; ++i) {
 		std::cout << "Generation: " << (i+1) << std::endl;
 		this->evolve();
-		std::cout << "Best: " << this->best_chromosome().exafs_score << std::endl;
+
+		Chromosome best_individual = this->best_chromosome();
+		this->best_individuals.push_back(best_individual);
+		std::cout << "Best: " << best_individual.exafs_score << std::endl;
 	}
 
-	this->closeStats();
+	this->finalStats();
 }
 
 void EXAFSGA::initPopulation(std::vector< std::vector<PDBAtom> > population) {
@@ -49,16 +53,19 @@ void EXAFSGA::initPopulation(std::vector< std::vector<PDBAtom> > population) {
 
 void EXAFSGA::evaluatePopulation() {
 	for (int i = 0; i < (int)this->population.size(); ++i) {
-		this->evaluate(this->population[i]);
+		if (!this->population[i].is_evaluated) {
+			this->evaluate(this->population[i]);
+			this->population[i].is_evaluated = true;
+		}
 		std::cout << "\t Child: " << i << ", " << this->population[i].exafs_score << std::endl;
 	}
 }
 
 void EXAFSGA::evaluate( Chromosome& child ) {
-	this->exafs_evaluator->updateAtoms(child);
+	this->exafs_evaluator->updateAtoms(child.atoms);
 	
-	double exafs_score = this->exafs_evaluator->calculateRMSD();
-	child.exafs_score = exafs_score;
+	child.exafs_score = this->exafs_evaluator->calculateRMSD();
+	child.exafs_data = this->exafs_evaluator->getEXAFSData();
 }
 
 void EXAFSGA::evolve() {
@@ -76,9 +83,13 @@ void EXAFSGA::evolve() {
 
 		if (this->crossover_rate > (rand() / double(RAND_MAX))) {
 			this->crossover(p1,p2);
+			p1.is_evaluated = false;
+			p2.is_evaluated = false;
 		} else if (this->mutation_rate > (rand() / double(RAND_MAX))) {
 			this->mutate(p1);
 			this->mutate(p2);
+			p1.is_evaluated = false;
+			p2.is_evaluated = false;
 		}
 
 		if ((int)new_population.size() < (int)this->population.size()) {
@@ -123,13 +134,13 @@ Chromosome EXAFSGA::selection() {
 void EXAFSGA::crossover(Chromosome& p1, Chromosome& p2) {
 
 	// One point crossover
-	int pivot = p1.size() * this->unifRand();
+	int pivot = p1.atoms.size() * this->unifRand();
 
 	for (int i = 0; i < pivot; ++i) {
 		
-		PDBAtom temp = p1[i];
-		p1[i] = p2[i];
-		p2[i] = temp;
+		PDBAtom temp = p1.atoms[i];
+		p1.atoms[i] = p2.atoms[i];
+		p2.atoms[i] = temp;
 
 	}
 
@@ -145,14 +156,14 @@ z = r cos theta
 */
 void EXAFSGA::mutate(Chromosome& child) {
 
-	int index = child.size() * this->unifRand();
+	int index = child.atoms.size() * this->unifRand();
 	double theta = 180 * this->unifRand();
 	double phi = 360 * this->unifRand();
 	double r = 0.05;
 
-	child[index].x = r * sin(theta) * cos(phi);
-	child[index].y = r * sin(theta) * sin(phi);
-	child[index].z = r * cos(theta);
+	child.atoms[index].x = r * sin(theta) * cos(phi);
+	child.atoms[index].y = r * sin(theta) * sin(phi);
+	child.atoms[index].z = r * cos(theta);
 
 }
 
@@ -201,7 +212,29 @@ void EXAFSGA::recordStats() {
 	this->output_stream << best_score << "," << (average_score/(int)this->population.size()) << std::endl;
 }
 
-void EXAFSGA::closeStats() {
+void EXAFSGA::finalStats() {
 
 	this->output_stream.close();
+
+	std::vector< std::pair<double, double> > target_exafs = this->exafs_evaluator->getTargetEXAFS();
+
+	std::ofstream output("generation_data.csv");
+	for (int i = 0; i < (int)this->best_individuals[0].exafs_data.size(); ++i) {
+		
+		output << this->best_individuals[0].exafs_data[i].first;
+
+		if (this->best_individuals[0].exafs_data[i].first != 0) {
+			output << "," << target_exafs[i-1].second;
+		} else {
+			output << ",0";
+		}
+
+		for (int j = 0; j < (int)this->best_individuals.size(); ++j) {
+			
+			output << "," << this->best_individuals[j].exafs_data[i].second;
+		}
+		output << std::endl;
+	}
+	output.close();
+	
 }
