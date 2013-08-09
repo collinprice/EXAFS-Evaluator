@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 		std::cout << "Seed: " << inital_seed << std::endl;
 	}
 
-	PDBHelper* pdb_helper = new PDBHelper(config.getString("pdb-file"), config.getString("amber-topology-file"), "temp_pdb.pdb");
+	PDBHelper* pdb_helper = new PDBHelper(config.getString("target-atom"), config.getString("pdb-file"), config.getString("amber-topology-file"), "temp_pdb.pdb");
 	IFEFFITHelper* ifeffit_helper = new IFEFFITHelper(pdb_helper->getEXAFSAtoms(), config.getString("target-atom"), config.getString("experimental-exafs"), config.getFloat("x-min"), config.getFloat("x-max"), config.getString("feff"), config.getString("ifeffit"));
 	VMDHelper* vmd_helper = new VMDHelper(pdb_helper->output_pdb_file, config.getString("amber-topology-file"), config.getString("namd2-path"), config.getString("vmd-path"));
 

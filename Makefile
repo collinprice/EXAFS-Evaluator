@@ -24,7 +24,15 @@ CC_SRC_OBJS = $(CC_SRC:.c=.o)
 
 EXECUTABLE = main
 
+INSTALL_PATH = oec
+
 all: $(SOURCES) $(EXECUTABLE)
+
+install: all put
+
+put:
+	mkdir -p $(INSTALL_PATH)
+	cp $(EXECUTABLE) $(INSTALL_PATH)/
 	
 $(EXECUTABLE): $(CPP_SRC_OBJS) $(CC_SRC_OBJS)
 	$(CXX) $(CPP_SRC_OBJS) $(CC_SRC_OBJS) -o $@ $(LDFLAGS)
