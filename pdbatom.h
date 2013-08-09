@@ -11,6 +11,7 @@ public:
 	double y;
 	double z;
 
+	PDBAtom(int index, double x, double y, double z);
 	PDBAtom(std::string atomic_symbol, int index, double x, double y, double z);
 	int getAtomicNumber();
 	int getIndex();

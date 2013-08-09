@@ -10,9 +10,8 @@ public:
 	int numberOfAtoms();
 	std::string atomAtIndex(int index);
 	std::string output_pdb_file;
-	std::string target_atom;
 
-	PDBHelper(std::string target_atom, std::string pdb_file, std::string amber_topology_file, std::string output_pdb_file);
+	PDBHelper(std::string pdb_file, std::string amber_topology_file, std::string output_pdb_file);
 	~PDBHelper();
 
 	std::vector<PDBAtom> getEXAFSAtoms();

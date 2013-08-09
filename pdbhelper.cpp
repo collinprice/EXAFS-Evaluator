@@ -9,13 +9,12 @@ extern "C" {
 
 #define C_TEXT( text ) ((char*)std::string( text ).c_str())
 
-PDBHelper::PDBHelper(std::string target_atom, std::string pdb_file, std::string amber_topology_file, std::string output_pdb_file) {
+PDBHelper::PDBHelper(std::string pdb_file, std::string amber_topology_file, std::string output_pdb_file) {
 
 	read_pdb(C_TEXT(pdb_file));
 	read_parm7(C_TEXT(amber_topology_file)); // Restore reliable atom names
 	mass_to_element();
 
-	this->target_atom = target_atom;
 	this->output_pdb_file = output_pdb_file;
 }
 
@@ -40,7 +39,7 @@ std::vector<PDBAtom> PDBHelper::getEXAFSAtoms() {
 	std::vector<PDBAtom> exafs_atoms;
 
 	for (int i = 0; i < N; ++i) {
-		if (occupancy[i] == 1 && this->atomAtIndex(i).compare(this->target_atom) == 0) {
+		if (occupancy[i] == 1) {
 			exafs_atoms.push_back(PDBAtom(this->atomAtIndex(i), i, X[i], Y[i], Z[i]));
 		}
 	}

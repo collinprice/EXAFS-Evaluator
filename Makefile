@@ -13,27 +13,18 @@ CPP_SRC = \
 	vmdhelper.cpp \
 	ifeffithelper.cpp \
 	exafsevaluator.cpp \
-	iohelper/iohelper.cpp \
 	chromosome.cpp \
-	exafsga.cpp
+	exafsga.cpp \
+	dcdhelper.cpp
 
 CPP_SRC_OBJS = $(CPP_SRC:.cpp=.o)
 
-CC_SRC = file_read_write.c
+CC_SRC = file_read_write.c dcd.c
 CC_SRC_OBJS = $(CC_SRC:.c=.o)
 
 EXECUTABLE = main
-
 INSTALL_PATH = oec
 
-all: $(SOURCES) $(EXECUTABLE)
-
-install: all put
-
-put:
-	mkdir -p $(INSTALL_PATH)
-	cp $(EXECUTABLE) $(INSTALL_PATH)/
-	
 $(EXECUTABLE): $(CPP_SRC_OBJS) $(CC_SRC_OBJS)
 	$(CXX) $(CPP_SRC_OBJS) $(CC_SRC_OBJS) -o $@ $(LDFLAGS)
 
@@ -43,6 +34,13 @@ $(EXECUTABLE): $(CPP_SRC_OBJS) $(CC_SRC_OBJS)
 .c.o:
 	$(CC) $(CCFLAGS) $< -o $@
 
+all: $(SOURCES) $(EXECUTABLE)
 
+put:
+	mkdir -p $(INSTALL_PATH)
+	cp $(EXECUTABLE) $(INSTALL_PATH)/
+	
 clean:
-		rm -rf $(CPP_SRC_OBJS) $(CC_SRC_OBJS) $(EXECUTABLE)
+	rm -rf $(CPP_SRC_OBJS) $(CC_SRC_OBJS) $(EXECUTABLE)
+
+install: all put
