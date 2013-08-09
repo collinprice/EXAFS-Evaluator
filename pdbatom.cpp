@@ -1,7 +1,8 @@
 #include "pdbatom.h"
 
-PDBAtom::PDBAtom(std::string atomic_symbol, int index, double x, double y, double z) {
+PDBAtom::PDBAtom(std::string target_atom, std::string atomic_symbol, int index, double x, double y, double z) {
 
+	this->target_atom = target_atom;
 	this->atomic_symbol = atomic_symbol;
 	this->index = index;
 	this->x = x;

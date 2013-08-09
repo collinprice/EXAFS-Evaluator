@@ -6,12 +6,13 @@ class PDBAtom {
 
 public:
 	
+	std::string target_atom;
 	std::string atomic_symbol;
 	double x;
 	double y;
 	double z;
 
-	PDBAtom(std::string atomic_symbol, int index, double x, double y, double z);
+	PDBAtom(std::string target_atom, std::string atomic_symbol, int index, double x, double y, double z);
 	int getAtomicNumber();
 	int getIndex();
 
