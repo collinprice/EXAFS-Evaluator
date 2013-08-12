@@ -15,6 +15,7 @@ public:
 	PDBAtom(std::string atomic_symbol, int index, double x, double y, double z);
 	int getAtomicNumber();
 	int getIndex();
+	double distance(PDBAtom atom);
 
 	static std::string atomicNumberToSymbol(int atomic_number);
 	static int atomicSymbolToNumber(std::string atomic_symbol);

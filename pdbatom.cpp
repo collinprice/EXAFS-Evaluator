@@ -1,4 +1,5 @@
 #include "pdbatom.h"
+#include "math.h"
 
 PDBAtom::PDBAtom(int index, double x, double y, double z) {
 
@@ -29,6 +30,11 @@ int PDBAtom::getAtomicNumber() {
 
 int PDBAtom::getIndex() {
 	return this->index;
+}
+
+double PDBAtom::distance(PDBAtom atom) {
+
+	return sqrt(pow(atom.x - this->x, 2) + pow(atom.y - this->y, 2) + pow(atom.z - this->z, 2));
 }
 
 std::string PDBAtom::atomicNumberToSymbol(int atomic_number) {

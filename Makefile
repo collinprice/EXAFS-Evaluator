@@ -15,7 +15,8 @@ CPP_SRC = \
 	exafsevaluator.cpp \
 	chromosome.cpp \
 	exafsga.cpp \
-	dcdhelper.cpp
+	dcdhelper.cpp \
+	clustering.cpp
 
 CPP_SRC_OBJS = $(CPP_SRC:.cpp=.o)
 
