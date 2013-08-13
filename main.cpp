@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 	// }
 
 	std::cout << "Getting inital population." << std::endl;
-	std::vector< std::vector<PDBAtom> > initial_population = DCDHelper::getXYZs(config.getString("dcd-file"));
+	std::vector< std::vector<PDBAtom> > initial_population = DCDHelper::getXYZs(config.getString("dcd-file"), 0.05);
 
 	// std::vector< std::vector<PDBAtom> > updatedEXAFSPopulation;
 	// for (std::vector< std::vector<PDBAtom> >::iterator ind = initial_population.begin(); ind != initial_population.end(); ++ind) {
@@ -68,13 +68,14 @@ int main(int argc, char **argv) {
 	// 	for (int j = 0; j < (int)table.size(); ++j) {
 			
 	// 		output << table[i][j] << ",";
+	// 		if (i == j) break;
 	// 	}
 	// 	output << std::endl;
 	// }
 	// output.close();
 
-	std::cout << "GA: Begin" << std::endl;
-	ga.begin(initial_population);
+	// std::cout << "GA: Begin" << std::endl;
+	// ga.begin(initial_population);
 
 	return 0;
 }

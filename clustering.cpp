@@ -18,6 +18,8 @@ std::vector< std::vector<double> > Clustering::createTable(std::vector< std::vec
 				difference += atoms[i][k].distance(atoms[j][k]);
 			}
 			row.push_back(difference);
+
+			if (i == j) break;
 		}
 
 		table.push_back(row);
