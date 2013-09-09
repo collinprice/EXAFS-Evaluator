@@ -45,14 +45,8 @@ int main(int argc, char **argv) {
 
 	EXAFSGA ga(exafs_evaluator, config.getDouble("mutation"), config.getDouble("crossover"), config.getBool("elitism"), config.getInt("max-generations"), config.getString("results"));
 
-	// std::vector<PDBAtom> atoms = pdb_helper->getEXAFSAtoms();
-	// for (std::vector<PDBAtom>::iterator i = atoms.begin(); i != atoms.end(); ++i)
-	// {
-	// 	std::cout << i->getIndex() << std::endl;
-	// }
-
 	std::cout << "Getting inital population." << std::endl;
-	std::vector< std::vector<PDBAtom> > initial_population = DCDHelper::getXYZs(config.getString("dcd-file"), 0.05);
+	std::vector< std::vector<PDBAtom> > initial_population = DCDHelper::getXYZs(config.getString("dcd-file"), config.getDouble("percent-of-dcd"));
 
 	// std::vector< std::vector<PDBAtom> > updatedEXAFSPopulation;
 	// for (std::vector< std::vector<PDBAtom> >::iterator ind = initial_population.begin(); ind != initial_population.end(); ++ind) {
@@ -74,8 +68,8 @@ int main(int argc, char **argv) {
 	// }
 	// output.close();
 
-	// std::cout << "GA: Begin" << std::endl;
-	// ga.begin(initial_population);
+	std::cout << "GA: Begin" << std::endl;
+	ga.begin(initial_population);
 
 	return 0;
 }

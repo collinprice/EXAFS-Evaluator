@@ -22,10 +22,9 @@ std::vector< std::vector<PDBAtom> > DCDHelper::getXYZs(std::string filename, dou
 	float* z = new float[my_H.N];
 
 	std::cout << "Number of frames: " << my_H.NSet << std::endl;
+	std::cout << "Extracting " << (my_H.NSet * percent) << " frames" << std::endl;
 
 	int step = my_H.NSet / (my_H.NSet * percent);
-
-	std::cout << step << std::endl;
 	std::vector< std::vector<PDBAtom> > molecules;
 	int counter = 0;
 	for (int j = 0; j < my_H.NSet; j += step) {
@@ -39,7 +38,7 @@ std::vector< std::vector<PDBAtom> > DCDHelper::getXYZs(std::string filename, dou
 		}
 		molecules.push_back(points);
 	}
-	std::cout << counter << std::endl;
+	
 	free(x);
 	free(y);
 	free(z);
