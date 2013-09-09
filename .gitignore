@@ -29,4 +29,5 @@ oec/generation_data.csv
 oec/output.dcd
 oec/output.dcd.full
 oec/table*
+oec/temp_pdb.pdb
 log
