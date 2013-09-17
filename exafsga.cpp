@@ -65,6 +65,8 @@ void EXAFSGA::evaluate( Chromosome& child ) {
 	
 	child.exafs_score = this->exafs_evaluator->calculateRMSD();
 	child.exafs_data = this->exafs_evaluator->getEXAFSData();
+
+	child.potential_energy = this->exafs_evaluator->calculatePotentialEnergy();
 }
 
 void EXAFSGA::evolve() {
@@ -204,18 +206,22 @@ void EXAFSGA::initStats() {
 
 void EXAFSGA::recordStats() {
 
-	double average_score = 0;
+	double average_exafs_score = 0;
+	double average_potential_energy_score = 0;
 	double best_score = std::numeric_limits<double>::max();
+	Chromosome best_chromosome;
 
 	for (std::vector<Chromosome>::iterator child = this->population.begin(); child != this->population.end(); ++child) {
 		
-		average_score += child->exafs_score;
+		average_exafs_score += child->exafs_score;
+		average_potential_energy_score += child->potential_energy;
 		if (child->exafs_score < best_score) {
 			best_score = child->exafs_score;
+			best_chromosome = *child;
 		}
 	}
 
-	this->output_stream << best_score << "," << (average_score/(int)this->population.size()) << std::endl;
+	this->output_stream << best_score << "," << (average_exafs_score/(int)this->population.size()) << "," << best_chromosome.potential_energy << "," << (average_potential_energy_score/(int)this->population.size()) << std::endl;
 }
 
 void EXAFSGA::finalStats() {
