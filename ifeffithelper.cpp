@@ -15,7 +15,8 @@ const std::string IFEFFITHelper::CALCULATED_EXAFS_FILENAME = "my_chi.chi3";
 const std::string IFEFFITHelper::IFEFFIT_SCRIPT = "_ifeffit_script.sh";
 const std::string IFEFFITHelper::CLEAN_SCRIPT = "clean.sh";
 
-IFEFFITHelper::IFEFFITHelper(std::vector<PDBAtom> atoms, 
+IFEFFITHelper::IFEFFITHelper(std::string folder_name, 
+								std::vector<PDBAtom> atoms, 
 								std::string target_atom, 
 								std::string target_exafs_filename,
 								double x_min, 
@@ -45,7 +46,7 @@ IFEFFITHelper::IFEFFITHelper(std::vector<PDBAtom> atoms,
 		"do",
 		"\techo \"$i\" >> process_files.dat",
 		"done",
-		"cd .."
+		"cd ../.."
 	};
 
 	std::string ifeffit_header[] = {
@@ -75,6 +76,10 @@ IFEFFITHelper::IFEFFITHelper(std::vector<PDBAtom> atoms,
 		ifeffit_path + " -q process.iff"
 	};
 
+	// Create directory to contain all directories/files needed for ifeffit calculation.
+	this->folder_name = folder_name;
+	mkdir(folder_name.c_str(), 0755);
+
 	int target_atom_atomic_number = PDBAtom::atomicSymbolToNumber(target_atom);
 
 	// Init header array.
@@ -94,6 +99,7 @@ IFEFFITHelper::IFEFFITHelper(std::vector<PDBAtom> atoms,
 		}
 	}
 
+	// Creating header information for feff.inp file.
 	std::ostringstream oss;
 	oss << "\t" << 0 << "\t" << target_atom_atomic_number << "\t" << target_atom;
 
@@ -113,27 +119,26 @@ IFEFFITHelper::IFEFFITHelper(std::vector<PDBAtom> atoms,
 	}
 
 	// PREPARE
+	// Generate folders for each target atom and cached files.
 	std::string setup_feff_script("feff_setup.sh");
 	std::ofstream feff_setup(setup_feff_script.c_str());
 
-	// Create folders for each feff/ifeffit run
-	
 	size = (int)this->target_indexes.size();
 	for (int i = 0; i < size; ++i) {
 		std::ostringstream oss;
 		oss << i;
-		mkdir(oss.str().c_str(), 0755);
+		mkdir((folder_name + "/" + oss.str()).c_str(), 0755);
 
-		feff_setup << "cd " << oss.str().c_str() << std::endl;
+		feff_setup << "cd " << folder_name << "/" << oss.str().c_str() << std::endl;
 		int temp_size = sizeof(feff_setup_steps)/sizeof(feff_setup_steps[0]);
 		for (int i = 0; i < temp_size; ++i) {
 			feff_setup << feff_setup_steps[i] << std::endl;
 		}
 
-		this->cached_feff_filenames.push_back(oss.str() + "/feff.inp");
+		this->cached_feff_filenames.push_back(folder_name + "/" + oss.str() + "/feff.inp");
 
-		std::ofstream ifeffit_script_file((oss.str() + IFEFFITHelper::IFEFFIT_SCRIPT).c_str());
-		ifeffit_script_file << "cd " << oss.str() << std::endl;
+		std::ofstream ifeffit_script_file((folder_name + "/" + oss.str() + IFEFFITHelper::IFEFFIT_SCRIPT).c_str());
+		ifeffit_script_file << "cd " << folder_name << "/" << oss.str() << std::endl;
 		temp_size = sizeof(ifeffit_script)/sizeof(ifeffit_script[0]);
 		for (int i = 0; i < temp_size; ++i) {
 			ifeffit_script_file << ifeffit_script[i] << std::endl;
@@ -155,7 +160,7 @@ IFEFFITHelper::IFEFFITHelper(std::vector<PDBAtom> atoms,
 		std::ostringstream oss;
 		oss << i;
 
-		std::ifstream process_file((oss.str() + "/process_files.dat").c_str());
+		std::ifstream process_file((folder_name + "/" + oss.str() + "/process_files.dat").c_str());
 		if (!process_file.is_open()) {
 			// return false;
 		}
@@ -168,10 +173,10 @@ IFEFFITHelper::IFEFFITHelper(std::vector<PDBAtom> atoms,
 			files.push_back(name);
 		}
 		process_file.close();
-		unlink((oss.str() + "/process_files.dat").c_str());
+		unlink((folder_name + "/" + oss.str() + "/process_files.dat").c_str());
 
 
-		std::ofstream ifeffit_file((oss.str() + "/process.iff").c_str());
+		std::ofstream ifeffit_file((folder_name + "/" + oss.str() + "/process.iff").c_str());
 		if (!ifeffit_file.is_open()) {
 			// return false;
 		}
@@ -193,7 +198,7 @@ IFEFFITHelper::IFEFFITHelper(std::vector<PDBAtom> atoms,
 		ifeffit_file.close();
 
 		// Move target exafs file into folder.
-		system(("cp " + target_exafs_filename + " " + oss.str()).c_str());
+		system(("cp " + target_exafs_filename + " " + folder_name + "/" + oss.str()).c_str());
 
 		oss.clear();
 		oss.str("");
@@ -202,8 +207,6 @@ IFEFFITHelper::IFEFFITHelper(std::vector<PDBAtom> atoms,
 	this->readTargetEXAFS(target_exafs_filename);
 	this->x_min = x_min;
 	this->x_max = x_max;
-
-	this->clean_script();
 }
 
 IFEFFITHelper::~IFEFFITHelper() {
@@ -229,7 +232,7 @@ std::vector< std::pair<double, double> > IFEFFITHelper::getTargetEXAFS() {
 }
 
 void IFEFFITHelper::clean() {
-	system(("bash " + IFEFFITHelper::CLEAN_SCRIPT).c_str());
+	system(("rm -rf " + this->folder_name).c_str());
 }
 
 // PRIVATE FUNCTIONS
@@ -308,7 +311,7 @@ void IFEFFITHelper::processIFEFFIT(bool threaded) {
 		for (int i = 0; i < (int)this->target_indexes.size(); ++i) {
 			std::ostringstream oss;
 			oss << i;
-			std::string bash_string = "bash " + oss.str() + IFEFFITHelper::IFEFFIT_SCRIPT;
+			std::string bash_string = "bash " + folder_name + "/" + oss.str() + IFEFFITHelper::IFEFFIT_SCRIPT;
 			commands.push_back(bash_string);
 		}
 
@@ -324,7 +327,7 @@ void IFEFFITHelper::processIFEFFIT(bool threaded) {
 		for (int i = 0; i < (int)this->target_indexes.size(); ++i) {
 			std::ostringstream oss;
 			oss << i;
-			system(("bash " + oss.str() + IFEFFITHelper::IFEFFIT_SCRIPT).c_str());
+			system(("bash " + folder_name + "/" + oss.str() + IFEFFITHelper::IFEFFIT_SCRIPT).c_str());
 		}
 	}
 	
@@ -349,7 +352,7 @@ double IFEFFITHelper::calculateRMSD() {
 	for (int i = 0; i < (int)this->target_indexes.size(); ++i) {
 		std::vector< std::pair<double, double> > exafs_data;
 		oss << i;
-		std::ifstream exafs_file(oss.str() + "/" + IFEFFITHelper::CALCULATED_EXAFS_FILENAME);
+		std::ifstream exafs_file(folder_name + "/" + oss.str() + "/" + IFEFFITHelper::CALCULATED_EXAFS_FILENAME);
 
 		std::string x,y;
 		// Skip the first three lines. They are headers.
@@ -410,24 +413,13 @@ double IFEFFITHelper::calculateRMSD() {
 	return rmsd;
 }
 
-void IFEFFITHelper::clean_script() {
-
-	std::ofstream cleaner(IFEFFITHelper::CLEAN_SCRIPT);
-	for (int i = 0; i < (int)this->target_indexes.size(); ++i) {
-		cleaner << "rm -rf " << i << std::endl;
-		cleaner << "rm -rf " << i << IFEFFITHelper::IFEFFIT_SCRIPT << std::endl;
-	}
-	cleaner << "rm " << IFEFFITHelper::CLEAN_SCRIPT << std::endl;
-	cleaner.close();
-}
-
 bool IFEFFITHelper::canPerformIFEFFITCalculations() {
 
 	bool has_files = true;
 	for (int i = 0; i < (int)this->target_indexes.size(); ++i) {
 		std::ostringstream oss;
 		oss << i;
-		std::string filename = oss.str() + "/" + IFEFFITHelper::CALCULATED_EXAFS_FILENAME;
+		std::string filename = folder_name + "/" + oss.str() + "/" + IFEFFITHelper::CALCULATED_EXAFS_FILENAME;
 		
 		std::ifstream temp_file(filename.c_str());
 		if (!temp_file.good()) {
@@ -446,7 +438,7 @@ void IFEFFITHelper::removeAllCalculatedEXAFSFiles() {
 	for (int i = 0; i < (int)this->target_indexes.size(); ++i) {
 		std::ostringstream oss;
 		oss << i;
-		std::string filename = oss.str() + "/" + IFEFFITHelper::CALCULATED_EXAFS_FILENAME;
+		std::string filename = folder_name + "/" + oss.str() + "/" + IFEFFITHelper::CALCULATED_EXAFS_FILENAME;
 		remove(filename.c_str());
 	}
 }

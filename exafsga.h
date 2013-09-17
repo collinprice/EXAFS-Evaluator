@@ -35,6 +35,7 @@ class EXAFSGA {
 		void mutate(Chromosome& child);
 
 		Chromosome best_chromosome();
+		void saveBestChromosome();
 
 		double unifRand();
 

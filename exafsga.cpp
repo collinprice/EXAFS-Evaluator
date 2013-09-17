@@ -32,9 +32,7 @@ void EXAFSGA::begin(std::vector< std::vector<PDBAtom> > initial_population) {
 		std::cout << "Generation: " << (i+1) << std::endl;
 		this->evolve();
 
-		Chromosome best_individual = this->best_chromosome();
-		this->best_individuals.push_back(best_individual);
-		std::cout << "Best: " << best_individual.exafs_score << std::endl;
+		this->saveBestChromosome();
 	}
 
 	this->finalStats();
@@ -49,6 +47,7 @@ void EXAFSGA::initPopulation(std::vector< std::vector<PDBAtom> > population) {
 	}
 
 	this->evaluatePopulation();
+	this->saveBestChromosome();
 }
 
 void EXAFSGA::evaluatePopulation() {
@@ -182,6 +181,13 @@ Chromosome EXAFSGA::best_chromosome() {
 	return best_chromosome;
 }
 
+void EXAFSGA::saveBestChromosome() {
+
+	Chromosome best_individual = this->best_chromosome();
+	this->best_individuals.push_back(best_individual);
+	std::cout << "Best: " << best_individual.exafs_score << std::endl;
+}
+
 double EXAFSGA::unifRand() {
 	return rand() / double(RAND_MAX);
 }
@@ -217,7 +223,6 @@ void EXAFSGA::finalStats() {
 	this->output_stream.close();
 
 	std::vector< std::pair<double, double> > target_exafs = this->exafs_evaluator->getTargetEXAFS();
-
 	std::ofstream output("generation_data.csv");
 	for (int i = 0; i < (int)this->best_individuals[0].exafs_data.size(); ++i) {
 		
@@ -239,4 +244,5 @@ void EXAFSGA::finalStats() {
 	
 	this->exafs_evaluator->updateAtoms(this->best_individuals[this->best_individuals.size()-1].atoms);
 	this->exafs_evaluator->writePDB("best_chromosome.pdb");
+	
 }
