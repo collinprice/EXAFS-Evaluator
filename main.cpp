@@ -7,6 +7,44 @@
 #include <string>
 #include <unistd.h>
 #include <memory>
+#include <math.h>
+
+double unifRand() {
+	return rand() / double(RAND_MAX);
+}
+
+PDBAtom random_move(PDBAtom atom, double max_radius) {
+
+	double theta = 180 * unifRand();
+	double phi = 360 * unifRand();
+	double r = max_radius * unifRand();
+
+	atom.x = r * sin(theta) * cos(phi);
+	atom.y = r * sin(theta) * sin(phi);
+	atom.z = r * cos(theta);
+
+	return atom;
+}
+
+std::vector< std::vector<PDBAtom> > random_population(std::vector<PDBAtom> seed, int size, double max_radius) {
+
+	std::cout << "Size = " << size << std::endl;
+
+	std::vector< std::vector<PDBAtom> > population;
+
+	for (int i = 0; i < size; ++i) {
+		
+		std::vector<PDBAtom> individual = seed;
+
+		for (int i = 0; i < (int)individual.size(); ++i) {
+			individual[i] = random_move(individual[i], max_radius);
+		}
+
+		population.push_back(individual);
+	}
+
+	return population;
+}
 
 int main(int argc, char **argv) {
 	
@@ -45,8 +83,27 @@ int main(int argc, char **argv) {
 
 	EXAFSGA ga(exafs_evaluator, config.getDouble("mutation"), config.getDouble("crossover"), config.getBool("elitism"), config.getInt("max-generations"), config.getString("results"));
 
-	std::cout << "Getting inital population." << std::endl;
-	std::vector< std::vector<PDBAtom> > initial_population = DCDHelper::getXYZs(config.getString("dcd-file"), config.getDouble("percent-of-dcd"));
+	std::cout << "Getting initial population." << std::endl;
+
+	std::vector< std::vector<PDBAtom> > initial_population;
+	switch (config.getInt("population-type")) {
+		case 0: {
+			std::vector< std::vector<PDBAtom> > initial_dcd_population = DCDHelper::getXYZs(config.getString("dcd-file"), config.getInt("population-size"));
+			for (std::vector< std::vector<PDBAtom> >::iterator i = initial_dcd_population.begin(); i != initial_dcd_population.end(); ++i) {
+
+				pdb_helper->updateAtomsFromXYZ(*i);
+				initial_population.push_back( pdb_helper->getEXAFSAtoms() );
+			}
+			break;
+		}
+		case 1: {
+			std::vector< std::vector<PDBAtom> > initial_exafs_population = random_population(pdb_helper->getEXAFSAtoms(), config.getInt("population-size"), 0.05);
+			for (std::vector< std::vector<PDBAtom> >::iterator i = initial_exafs_population.begin(); i != initial_exafs_population.end(); ++i) {
+				initial_population.push_back( *i );
+			}
+			break;
+		}
+	}
 
 	std::cout << "GA: Begin" << std::endl;
 	ga.begin(initial_population);

@@ -85,6 +85,19 @@ void PDBHelper::updateAtomsFromXYZ(std::string filename, bool onlyEXAFS) {
 	xyz_file.close();
 }
 
+void PDBHelper::updateAtomsFromXYZ(std::vector<PDBAtom> atoms) {
+
+	for (std::vector<PDBAtom>::iterator atom = atoms.begin(); atom != atoms.end(); ++atom) {
+		
+		int index = atom->getIndex();
+		if (this->validAtom(this->atomAtIndex(index))) {
+			X[index] = atom->x;
+			Y[index] = atom->y;
+			Z[index] = atom->z;
+		}
+	}
+}
+
 void PDBHelper::updateAtomsFromList(std::vector<PDBAtom> atoms) {
 
 	for (std::vector<PDBAtom>::iterator atom = atoms.begin(); atom != atoms.end(); ++atom) {

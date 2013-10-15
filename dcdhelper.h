@@ -7,6 +7,6 @@ class DCDHelper {
 
 public:
 
-	static std::vector< std::vector<PDBAtom> > getXYZs(std::string filename, double percent);
+	static std::vector< std::vector<PDBAtom> > getXYZs(std::string filename, int size);
 
 };
