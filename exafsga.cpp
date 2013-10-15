@@ -33,6 +33,8 @@ void EXAFSGA::begin(std::vector< std::vector<PDBAtom> > initial_population) {
 		this->evolve();
 
 		this->saveBestChromosome();
+
+		if (this->convergence()) break;
 	}
 
 	this->finalStats();
@@ -187,6 +189,7 @@ void EXAFSGA::saveBestChromosome() {
 
 	Chromosome best_individual = this->best_chromosome();
 	this->best_individuals.push_back(best_individual);
+
 	std::cout << "Best: " << best_individual.exafs_score << std::endl;
 }
 
@@ -251,4 +254,19 @@ void EXAFSGA::finalStats() {
 	this->exafs_evaluator->updateAtoms(this->best_individuals[this->best_individuals.size()-1].atoms);
 	this->exafs_evaluator->writePDB("best_chromosome.pdb");
 	
+}
+
+bool EXAFSGA::convergence() {
+
+	double first_child_score = this->population[0].exafs_score;
+	for (int i = 0; i < (int)this->population.size(); ++i) {
+		
+		if (this->population[i].exafs_score != first_child_score) {
+
+			return false;
+		}
+	}
+
+	std::cout << "Early convergence. Ending run." << std::endl;
+	return true;
 }

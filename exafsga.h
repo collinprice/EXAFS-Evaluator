@@ -42,4 +42,6 @@ class EXAFSGA {
 		void initStats();
 		void recordStats();
 		void finalStats();
+
+		bool convergence();
 };

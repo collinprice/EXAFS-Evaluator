@@ -928,7 +928,7 @@ void write_one_pdb(char *label)
   FILE *fp;
   
  
-  printf("Writing file: %s\n",label);
+  // printf("Writing file: %s\n",label);
   fp = fopen(label,"wt");
   if(fp == NULL){printf("** E ** could not open file %s for writing, abort\n", label); exit(1);}
   resCount=0;

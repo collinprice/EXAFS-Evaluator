@@ -48,28 +48,9 @@ int main(int argc, char **argv) {
 	std::cout << "Getting inital population." << std::endl;
 	std::vector< std::vector<PDBAtom> > initial_population = DCDHelper::getXYZs(config.getString("dcd-file"), config.getDouble("percent-of-dcd"));
 
-	// std::vector< std::vector<PDBAtom> > updatedEXAFSPopulation;
-	// for (std::vector< std::vector<PDBAtom> >::iterator ind = initial_population.begin(); ind != initial_population.end(); ++ind) {
-		
-	// 	pdb_helper->updateAtomsFromList(*ind);
-	// 	updatedEXAFSPopulation.push_back(pdb_helper->getEXAFSAtoms());
-	// }
-
-	// std::vector< std::vector<double> > table = Clustering::createTable(updatedEXAFSPopulation);
-
-	// std::ofstream output("table.csv");
-	// for (int i = 0; i < (int)table.size(); ++i) {
-	// 	for (int j = 0; j < (int)table.size(); ++j) {
-			
-	// 		output << table[i][j] << ",";
-	// 		if (i == j) break;
-	// 	}
-	// 	output << std::endl;
-	// }
-	// output.close();
-
 	std::cout << "GA: Begin" << std::endl;
 	ga.begin(initial_population);
+	
 
 	return 0;
 }
