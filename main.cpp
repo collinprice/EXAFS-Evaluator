@@ -70,6 +70,7 @@ int main(int argc, char **argv) {
 
 	if (config.hasKey("seed")) {
 		srand(config.getInt("seed"));
+		std::cout << "Seed: " << config.getInt("seed") << std::endl;
 	} else {
 		time_t inital_seed = time(NULL);
 		srand(inital_seed);
@@ -91,7 +92,7 @@ int main(int argc, char **argv) {
 			std::vector< std::vector<PDBAtom> > initial_dcd_population = DCDHelper::getXYZs(config.getString("dcd-file"), config.getInt("population-size"));
 			for (std::vector< std::vector<PDBAtom> >::iterator i = initial_dcd_population.begin(); i != initial_dcd_population.end(); ++i) {
 
-				pdb_helper->updateAtomsFromXYZ(*i);
+				pdb_helper->updateEXAFSAtomsFromXYZ(*i);
 				initial_population.push_back( pdb_helper->getEXAFSAtoms() );
 			}
 			break;
