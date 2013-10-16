@@ -9,43 +9,6 @@
 #include <memory>
 #include <math.h>
 
-double unifRand() {
-	return rand() / double(RAND_MAX);
-}
-
-PDBAtom random_move(PDBAtom atom, double max_radius) {
-
-	double theta = 180 * unifRand();
-	double phi = 360 * unifRand();
-	double r = max_radius * unifRand();
-
-	atom.x = r * sin(theta) * cos(phi);
-	atom.y = r * sin(theta) * sin(phi);
-	atom.z = r * cos(theta);
-
-	return atom;
-}
-
-std::vector< std::vector<PDBAtom> > random_population(std::vector<PDBAtom> seed, int size, double max_radius) {
-
-	std::cout << "Size = " << size << std::endl;
-
-	std::vector< std::vector<PDBAtom> > population;
-
-	for (int i = 0; i < size; ++i) {
-		
-		std::vector<PDBAtom> individual = seed;
-
-		for (int i = 0; i < (int)individual.size(); ++i) {
-			individual[i] = random_move(individual[i], max_radius);
-		}
-
-		population.push_back(individual);
-	}
-
-	return population;
-}
-
 int main(int argc, char **argv) {
 	
 	int c;
@@ -68,18 +31,19 @@ int main(int argc, char **argv) {
 
 	Genfig config(input_file);
 
-	if (config.hasKey("seed")) {
-		srand(config.getInt("seed"));
-		std::cout << "Seed: " << config.getInt("seed") << std::endl;
-	} else {
-		time_t inital_seed = time(NULL);
-		srand(inital_seed);
-		std::cout << "Seed: " << inital_seed << std::endl;
-	}
 
 	PDBHelper* pdb_helper = new PDBHelper(config.getString("pdb-file"), config.getString("amber-topology-file"), "temp_pdb.pdb", config.getStringList("exafs-atoms"));
 	IFEFFITHelper* ifeffit_helper = new IFEFFITHelper(config.getString("folder-name"), pdb_helper->getEXAFSAtoms(), config.getString("target-atom"), config.getString("experimental-exafs"), config.getDouble("x-min"), config.getDouble("x-max"), config.getString("feff"), config.getString("ifeffit"));
 	VMDHelper* vmd_helper = new VMDHelper(pdb_helper->output_pdb_file, config.getString("amber-topology-file"), config.getString("namd2-path"), config.getString("vmd-path"));
+	
+	double rmsd = ifeffit_helper->run(pdb_helper->getEXAFSAtoms(), true);
+
+	pdb_helper->writePDBFile();
+	double potential_energy = vmd_helper->calculateEnergy();
+
+	std::cout << "RMSD = " << rmsd << std::endl;
+	std::cout << "Potential Energy = " << potential_energy << std::endl;
+/*
 	EXAFSEvaluator* exafs_evaluator = new EXAFSEvaluator(ifeffit_helper, pdb_helper, vmd_helper);
 
 	EXAFSGA ga(exafs_evaluator, config.getDouble("mutation"), config.getDouble("crossover"), config.getBool("elitism"), config.getInt("max-generations"), config.getString("results"));
@@ -108,7 +72,7 @@ int main(int argc, char **argv) {
 
 	std::cout << "GA: Begin" << std::endl;
 	ga.begin(initial_population);
-	
+*/	
 
 	return 0;
 }

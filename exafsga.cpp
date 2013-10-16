@@ -13,7 +13,6 @@ EXAFSGA::EXAFSGA(EXAFSEvaluator* exafs_evaluator, double mutation_rate, double c
 	this->elitism = elitism;
 	this->max_generations = max_generations;
 	this->results_file = results_file;
-
 }
 
 EXAFSGA::~EXAFSGA() {
@@ -77,6 +76,7 @@ void EXAFSGA::evolve() {
 	std::vector<Chromosome> new_population;
 
 	if (this->elitism) {
+		// std::cout << "elitism" << std::endl;
 		new_population.push_back(this->best_chromosome());
 	}
 
