@@ -44,7 +44,8 @@ std::vector<PDBAtom> PDBHelper::getEXAFSAtoms() {
 	std::vector<PDBAtom> exafs_atoms;
 
 	for (int i = 0; i < N; ++i) {
-		if (this->validEXAFSIndex(i) && this->validEXAFSAtomicSymbol(this->atomAtIndex(i))) {
+
+		if (occupancy[i] == 1 && this->validAtom(this->atomAtIndex(i))) {
 			exafs_atoms.push_back(PDBAtom(this->atomAtIndex(i), i, X[i], Y[i], Z[i]));
 		}
 	}
@@ -57,65 +58,58 @@ void PDBHelper::updateEXAFSAtoms(std::vector<PDBAtom> atoms) {
 	for (std::vector<PDBAtom>::iterator atom = atoms.begin(); atom != atoms.end(); ++atom) {
 		
 		int index = atom->getIndex();
+		X[index] = atom->x;
+		Y[index] = atom->y;
+		Z[index] = atom->z;
+	}
+}
 
-		if (this->validEXAFSAtom(*atom)) {
+void PDBHelper::updateAtomsFromXYZ(std::string filename, bool onlyEXAFS) {
+
+	std::ifstream xyz_file(filename.c_str());
+	std::string x,y,z;
+
+	int index = -1;
+	while(xyz_file.good()) {
+
+		xyz_file >> x >> y >> z;
+		++index;
+
+		if (onlyEXAFS && occupancy[index] != 1) continue;
+
+		X[index] = atof(x.c_str());
+		Y[index] = atof(y.c_str());
+		Z[index] = atof(z.c_str());		
+	}
+
+	xyz_file.close();
+}
+
+void PDBHelper::updateAtomsFromXYZ(std::vector<PDBAtom> atoms) {
+
+	for (std::vector<PDBAtom>::iterator atom = atoms.begin(); atom != atoms.end(); ++atom) {
+		
+		int index = atom->getIndex();
+		if (this->validAtom(this->atomAtIndex(index))) {
 			X[index] = atom->x;
 			Y[index] = atom->y;
 			Z[index] = atom->z;
 		}
-		
 	}
 }
 
-// void PDBHelper::updateAtomsFromXYZ(std::string filename, bool onlyEXAFS) {
+void PDBHelper::updateAtomsFromList(std::vector<PDBAtom> atoms) {
 
-// 	std::ifstream xyz_file(filename.c_str());
-// 	std::string x,y,z;
-
-// 	int index = -1;
-// 	while(xyz_file.good()) {
-
-// 		xyz_file >> x >> y >> z;
-// 		++index;
-
-// 		if (onlyEXAFS && occupancy[index] != 1) continue;
-
-// 		X[index] = atof(x.c_str());
-// 		Y[index] = atof(y.c_str());
-// 		Z[index] = atof(z.c_str());		
-// 	}
-
-// 	xyz_file.close();
-// }
-
-void PDBHelper::updateEXAFSAtomsFromXYZ(std::vector<PDBAtom> atoms) {
-
-	if ((int)atoms.size() != N) {
-		throw "PDB File does not contain the same amount of atoms as input XYZ file.";
-	}
-
-	for (int i = 0; i < N; ++i) {
+	for (std::vector<PDBAtom>::iterator atom = atoms.begin(); atom != atoms.end(); ++atom) {
 		
-		if (this->validEXAFSIndex(i) && this->validEXAFSAtomicSymbol(this->atomAtIndex(i))) {
-			X[i] = atoms[i].x;
-			Y[i] = atoms[i].y;
-			Z[i] = atoms[i].z;
+		if (occupancy[atom->getIndex()] == 1) {
+
+			X[atom->getIndex()] = atom->x;
+			Y[atom->getIndex()] = atom->y;
+			Z[atom->getIndex()] = atom->z;
 		}
 	}
 }
-
-// void PDBHelper::updateAtomsFromList(std::vector<PDBAtom> atoms) {
-
-// 	for (std::vector<PDBAtom>::iterator atom = atoms.begin(); atom != atoms.end(); ++atom) {
-		
-// 		if (occupancy[atom->getIndex()] == 1) {
-
-// 			X[atom->getIndex()] = atom->x;
-// 			Y[atom->getIndex()] = atom->y;
-// 			Z[atom->getIndex()] = atom->z;
-// 		}
-// 	}
-// }
 
 void PDBHelper::writePDBFile(std::string filename) {
 	write_one_pdb(C_TEXT(filename));
@@ -125,25 +119,10 @@ void PDBHelper::writePDBFile() {
 	this->writePDBFile(this->output_pdb_file);
 }
 
-bool PDBHelper::validEXAFSAtom(PDBAtom atom) {
-
-	if (occupancy[atom.getIndex()] == 1) {
-		for (std::vector<std::string>::iterator i = this->target_atoms.begin(); i != this->target_atoms.end(); ++i) {
-			if ((*i).compare(atom.atomic_symbol) == 0) return true;
-		}
-	}
-
-	return false;
-}
-
-bool PDBHelper::validEXAFSAtomicSymbol(std::string atom) {
+bool PDBHelper::validAtom(std::string atom) {
 	
 	for (std::vector<std::string>::iterator i = this->target_atoms.begin(); i != this->target_atoms.end(); ++i) {
 		if (*i == atom) return true;
 	}
 	return false;
-}
-
-bool PDBHelper::validEXAFSIndex(int index) {
-	return occupancy[index] == 1;
 }

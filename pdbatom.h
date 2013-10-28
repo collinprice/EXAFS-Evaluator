@@ -2,14 +2,6 @@
 #include <string>
 #include <string.h>
 
-/*
-	PDBAtom
-
-	Represents an atom within a pdb file.
-
-	index - The unique atom index within a pdb file. Only way to tell atoms apart besides atomic symbol.
-*/
-
 class PDBAtom {
 
 public:
@@ -23,10 +15,6 @@ public:
 	PDBAtom(std::string atomic_symbol, int index, double x, double y, double z);
 	int getAtomicNumber();
 	int getIndex();
-
-	/*
-		Returns the distance between two atoms based on their Euclidean distance.
-	*/
 	double distance(PDBAtom atom);
 
 	static std::string atomicNumberToSymbol(int atomic_number);

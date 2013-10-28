@@ -63,7 +63,6 @@ void EXAFSGA::evaluatePopulation() {
 }
 
 void EXAFSGA::evaluate( Chromosome& child ) {
-
 	this->exafs_evaluator->updateAtoms(child.atoms);
 	
 	child.exafs_score = this->exafs_evaluator->calculateRMSD();
