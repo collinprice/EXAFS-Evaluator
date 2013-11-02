@@ -1,6 +1,0 @@
-[submodule "genfig"]
-	path = genfig
-	url = git@github.com:collinprice/Genfig.git
-[submodule "iohelper"]
-	path = iohelper
-	url = git@github.com:collinprice/IOHelper.git
