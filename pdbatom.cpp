@@ -9,6 +9,15 @@ PDBAtom::PDBAtom(int index, double x, double y, double z) {
 	this->z = z;
 }
 
+PDBAtom::PDBAtom(std::string atomic_symbol, double x, double y, double z) {
+	
+	this->atomic_symbol = atomic_symbol;
+	this->index = -1;
+	this->x = x;
+	this->y = y;
+	this->z = z;	
+}
+
 PDBAtom::PDBAtom(std::string atomic_symbol, int index, double x, double y, double z) {
 
 	this->atomic_symbol = atomic_symbol;

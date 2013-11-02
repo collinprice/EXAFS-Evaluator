@@ -10,6 +10,7 @@ public:
 	IFEFFITHelper(std::string folder_name, std::vector<PDBAtom> atoms, std::string target_atom, std::string target_exafs_filename, double x_min, double x_max, std::string feff_path, std::string ifeffit_path);
 	~IFEFFITHelper();
 	double run(std::vector<PDBAtom> updated_atoms, bool threaded);
+	double run(std::string atoms_file, bool threaded);
 	std::vector< std::pair<double, double> > getEXAFSData();
 	std::vector< std::pair<double, double> > getTargetEXAFS();
 	void clean();
@@ -39,5 +40,6 @@ private:
 
 	bool canPerformIFEFFITCalculations();
 	void removeAllCalculatedEXAFSFiles();
+	void generateCleanCalculatedEXAFSFilesScript();
 
 };

@@ -28,7 +28,9 @@ oec/best_chromosome.pdb
 oec/generation_data.csv
 oec/output.dcd
 oec/output.dcd.full
+oec/output.dcd.orig
 oec/table*
+oec/run*
 oec/temp_pdb.pdb
 log
 oec/exafs
