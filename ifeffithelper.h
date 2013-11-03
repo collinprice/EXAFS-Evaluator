@@ -19,8 +19,10 @@ private:
 
 	static const std::string CALCULATED_EXAFS_FILENAME;
 	static const std::string IFEFFIT_SCRIPT;
+	static const std::string FEFF_SCRIPT;
 	static const std::string CLEAN_SCRIPT;
 
+	std::string target_exafs_filename;
 	std::string folder_name;
 	std::vector<int> target_indexes;
 	std::map<int, int> unique_atoms;
@@ -32,6 +34,7 @@ private:
 	double x_max;
 
 	void readTargetEXAFS(std::string filename);
+	void updateProcessFiles();
 	bool generateFEFFFile(std::vector<PDBAtom> atomic_coordinates, int index, std::string filename);
 	bool updateFEFFFiles(std::vector<PDBAtom> atomic_coordinates);
 	void processIFEFFIT(bool threaded);

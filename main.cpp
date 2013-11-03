@@ -9,6 +9,8 @@
 #include <memory>
 #include <math.h>
 
+#include <typeinfo>
+
 double unifRand() {
         return rand() / double(RAND_MAX);
 }
@@ -65,6 +67,30 @@ std::vector<PDBAtom> extractAtomsFromXYZ(std::string filename) {
 	return atoms;
 }
 
+std::vector<int> dcdGetIndexLessThan(std::string filename, double limit) {
+
+	std::vector<int> indexes;
+	std::ifstream index_file(filename.c_str());
+	if (index_file.is_open() && index_file.good()) {
+
+		std::string score_str;
+		int i = 0;
+		while(index_file.good()) {
+
+			index_file >> score_str;
+			double score = atof(score_str.c_str());
+
+			if (score < limit) {
+				indexes.push_back(i);
+			}
+			
+			++i;
+		}
+	}
+
+	return indexes;
+}
+
 int main(int argc, char **argv) {
 	
 	int c;
@@ -101,49 +127,110 @@ int main(int argc, char **argv) {
 	VMDHelper* vmd_helper = new VMDHelper(pdb_helper->output_pdb_file, config.getString("amber-topology-file"), config.getString("namd2-path"), config.getString("vmd-path"));
 	EXAFSEvaluator* exafs_evaluator = new EXAFSEvaluator(ifeffit_helper, pdb_helper, vmd_helper);
 
-	EXAFSGA ga(exafs_evaluator, config.getDouble("mutation"), config.getDouble("crossover"), config.getBool("elitism"), config.getInt("max-generations"), config.getString("results"));
+	if (config.getString("eval-type").compare("solo") == 0) {
+		std::cout << "Solo" << std::endl;
+		std::cout << "Initial pdb file" << std::endl;
+	 	double initial_rmsd = ifeffit_helper->run(pdb_helper->getEXAFSAtoms(), true);
+	 	std::cout << "RMSD = " << initial_rmsd << std::endl;
 
-	std::cout << "Getting initial population." << std::endl;
+	} else if (config.getString("eval-type").compare("ga") == 0) {
+		std::cout << "GA" << std::endl;
 
-	std::vector< std::vector<PDBAtom> > initial_population;
-	switch (config.getInt("population-type")) {
-		case 0: {
-			std::vector< std::vector<PDBAtom> > initial_dcd_population = DCDHelper::getXYZs(config.getString("dcd-file"), config.getInt("population-size"));
-			for (std::vector< std::vector<PDBAtom> >::iterator i = initial_dcd_population.begin(); i != initial_dcd_population.end(); ++i) {
+		EXAFSGA ga(exafs_evaluator, config.getDouble("mutation"), config.getDouble("crossover"), config.getBool("elitism"), config.getInt("max-generations"), config.getString("results"));
 
-				pdb_helper->updateEXAFSAtomsFromXYZ(*i);
-				initial_population.push_back( pdb_helper->getEXAFSAtoms() );
+		std::cout << "Getting initial population." << std::endl;
+
+		std::vector< std::vector<PDBAtom> > initial_population;
+		switch (config.getInt("population-type")) {
+			case 0: {
+				std::vector< std::vector<PDBAtom> > initial_dcd_population = DCDHelper::getXYZs(config.getString("dcd-file"), config.getInt("population-size"));
+				for (std::vector< std::vector<PDBAtom> >::iterator i = initial_dcd_population.begin(); i != initial_dcd_population.end(); ++i) {
+
+					pdb_helper->updateEXAFSAtomsFromXYZ(*i);
+					initial_population.push_back( pdb_helper->getEXAFSAtoms() );
+				}
+				break;
 			}
-			break;
-		}
-		case 1: {
-			std::vector< std::vector<PDBAtom> > initial_exafs_population = random_population(pdb_helper->getEXAFSAtoms(), config.getInt("population-size"), 0.05);
-			for (std::vector< std::vector<PDBAtom> >::iterator i = initial_exafs_population.begin(); i != initial_exafs_population.end(); ++i) {
-				initial_population.push_back( *i );
+			case 1: {
+				std::vector< std::vector<PDBAtom> > initial_exafs_population = random_population(pdb_helper->getEXAFSAtoms(), config.getInt("population-size"), 0.05);
+				for (std::vector< std::vector<PDBAtom> >::iterator i = initial_exafs_population.begin(); i != initial_exafs_population.end(); ++i) {
+					initial_population.push_back( *i );
+				}
+				break;
 			}
-			break;
 		}
+
+		std::cout << "GA: Begin" << std::endl;
+		ga.begin(initial_population);
+
+	} else if (config.getString("eval-type").compare("xyz") == 0) {
+		std::cout << "XYZ" << std::endl;
+
+		std::cout << "Initial pdb file" << std::endl;
+	 	double initial_rmsd = ifeffit_helper->run(pdb_helper->getEXAFSAtoms(), true);
+	 	std::cout << "RMSD = " << initial_rmsd << std::endl;
+
+		std::vector<std::string> xyz_files = config.getStringList("xyz-files");
+
+		for (std::vector<std::string>::iterator file = xyz_files.begin(); file != xyz_files.end(); ++file) {
+			
+			std::cout << "File: " << *file << std::endl;
+			std::vector<PDBAtom> atoms = extractAtomsFromXYZ(*file);
+			IFEFFITHelper ifeffit_helper = IFEFFITHelper(config.getString("folder-name"), atoms, config.getString("target-atom"), config.getString("experimental-exafs"), config.getDouble("x-min"), config.getDouble("x-max"), config.getString("feff"), config.getString("ifeffit"));
+
+			double rmsd = ifeffit_helper.run(atoms, true);
+			std::cout << "RMSD = " << rmsd << std::endl;
+
+		}
+	} else if (config.getString("eval-type").compare("indexes") == 0) {
+
+		std::cout << "Indexes" << std::endl;
+
+		std::vector<int> indexes = dcdGetIndexLessThan(config.getString("index-file"), config.getDouble("index-max"));
+
+	} else if (config.getString("eval-type").compare("index_ga") == 0) {
+
+		std::cout << "Index_GA" << std::endl;
+
+		std::vector<int> indexes = dcdGetIndexLessThan(config.getString("index-file"), config.getDouble("index-max"));
+		std::vector< std::vector<PDBAtom> > initial_population;
+
+		EXAFSGA ga(exafs_evaluator, config.getDouble("mutation"), config.getDouble("crossover"), config.getBool("elitism"), config.getInt("max-generations"), config.getString("results"));
+
+		std::vector< std::vector<PDBAtom> > initial_dcd_population = DCDHelper::getXYZsByIndex(config.getString("dcd-file"), indexes);
+		for (std::vector< std::vector<PDBAtom> >::iterator i = initial_dcd_population.begin(); i != initial_dcd_population.end(); ++i) {
+
+			pdb_helper->updateEXAFSAtomsFromXYZ(*i);
+			initial_population.push_back( pdb_helper->getEXAFSAtoms() );
+		}
+
+		std::cout << "GA: Begin" << std::endl;
+		ga.begin(initial_population);
+
+	} else {
+		std::cout << "Other" << std::endl;
+
+		// Get all the xyz entries.
+		std::vector< std::vector<PDBAtom> > initial_dcd_population = DCDHelper::getXYZs(config.getString("dcd-file"));
+
+		std::ofstream dcd_results((std::string("dcd_results.csv")).c_str());
+		for (std::vector< std::vector<PDBAtom> >::iterator i = initial_dcd_population.begin(); i != initial_dcd_population.end(); ++i) {
+			pdb_helper->updateEXAFSAtomsFromXYZ(*i);
+			double initial_rmsd = ifeffit_helper->run(pdb_helper->getEXAFSAtoms(), true);
+			
+			std::cout << initial_rmsd << std::endl;
+			dcd_results << initial_rmsd << std::endl;
+		}
+		dcd_results.close();
 	}
 
-	std::cout << "GA: Begin" << std::endl;
-	ga.begin(initial_population);
+	
 
-	// std::cout << "Initial pdb file" << std::endl;
- // 	double initial_rmsd = ifeffit_helper->run(pdb_helper->getEXAFSAtoms(), true);
- // 	std::cout << "RMSD = " << initial_rmsd << std::endl;
 
-	// std::vector<std::string> xyz_files = config.getStringList("xyz-files");
 
-	// for (std::vector<std::string>::iterator file = xyz_files.begin(); file != xyz_files.end(); ++file) {
-		
-	// 	std::cout << "File: " << *file << std::endl;
-	// 	std::vector<PDBAtom> atoms = extractAtomsFromXYZ(*file);
-	// 	IFEFFITHelper ifeffit_helper = IFEFFITHelper(config.getString("folder-name"), atoms, config.getString("target-atom"), config.getString("experimental-exafs"), config.getDouble("x-min"), config.getDouble("x-max"), config.getString("feff"), config.getString("ifeffit"));
+	
 
-	// 	double rmsd = ifeffit_helper.run(atoms, true);
-	// 	std::cout << "RMSD = " << rmsd << std::endl;
-
-	// }
+	
 
 	return 0;
 }

@@ -68,7 +68,7 @@ void EXAFSGA::evaluate( Chromosome& child ) {
 	child.exafs_score = this->exafs_evaluator->calculateRMSD();
 	child.exafs_data = this->exafs_evaluator->getEXAFSData();
 
-	child.potential_energy = this->exafs_evaluator->calculatePotentialEnergy();
+	// child.potential_energy = this->exafs_evaluator->calculatePotentialEnergy();
 }
 
 void EXAFSGA::evolve() {
