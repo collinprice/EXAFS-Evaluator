@@ -224,13 +224,5 @@ int main(int argc, char **argv) {
 		dcd_results.close();
 	}
 
-	
-
-
-
-	
-
-	
-
 	return 0;
 }
