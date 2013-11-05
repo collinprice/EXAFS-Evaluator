@@ -166,10 +166,6 @@ int main(int argc, char **argv) {
 	} else if (config.getString("eval-type").compare("xyz") == 0) {
 		std::cout << "XYZ" << std::endl;
 
-		std::cout << "Initial pdb file" << std::endl;
-	 	double initial_rmsd = ifeffit_helper->run(pdb_helper->getEXAFSAtoms(), true);
-	 	std::cout << "RMSD = " << initial_rmsd << std::endl;
-
 		std::vector<std::string> xyz_files = config.getStringList("xyz-files");
 
 		for (std::vector<std::string>::iterator file = xyz_files.begin(); file != xyz_files.end(); ++file) {
@@ -180,6 +176,16 @@ int main(int argc, char **argv) {
 
 			double rmsd = ifeffit_helper.run(atoms, true);
 			std::cout << "RMSD = " << rmsd << std::endl;
+
+			std::vector< std::pair<double, double> > target_exafs = ifeffit_helper.getTargetEXAFS();
+			std::vector< std::pair<double, double> > calculated_exafs = ifeffit_helper.getEXAFSData();
+
+			std::ofstream exafs_output((*file + ".csv").c_str());
+			for (int i = 0; i < (int)target_exafs.size() && i < (int)calculated_exafs.size() - 2; ++i) {
+				
+				exafs_output << target_exafs[i].first << "," << target_exafs[i].second << "," << calculated_exafs[i+1].second << std::endl;
+			}
+			exafs_output.close();
 
 		}
 	} else if (config.getString("eval-type").compare("indexes") == 0) {
