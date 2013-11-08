@@ -34,3 +34,5 @@ oec/run*
 oec/temp_pdb.pdb
 log
 oec/exafs
+oec/benchmark/*.csv
+oec/*.zip
