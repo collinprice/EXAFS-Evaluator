@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <memory>
 #include <math.h>
-
+#include <algorithm>
 #include <typeinfo>
 
 double unifRand() {
@@ -264,14 +264,18 @@ int main(int argc, char **argv) {
 			initial_population.push_back( pdb_helper->getEXAFSAtoms() );
 		}
 
-		std::cout << "GA: Begin" << std::endl;
-
 		std::vector< std::vector< std::vector<PDBAtom> > > initial_populations;
 
 		for (int i = 0; i < ga_config.getInt("runs"); ++i) {
-			initial_populations.push_back(initial_population);
+			
+			// Get subset of population.
+			std::random_shuffle(initial_population.begin(), initial_population.end());
+			std::vector< std::vector<PDBAtom> > subset_pop = std::vector< std::vector<PDBAtom> >(initial_population.begin(), initial_population.begin()+ga_config.getInt("population-size"));
+
+			initial_populations.push_back(subset_pop);
 		}
 
+		std::cout << "GA: Begin" << std::endl;
 		ga.begin(initial_populations);
 
 	} else if (ga_config.getString("eval-type").compare("index_ga_recenter") == 0) {

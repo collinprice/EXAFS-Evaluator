@@ -111,6 +111,7 @@ void EXAFSGA::begin_recentering(std::vector< std::vector< std::vector<PDBAtom> >
 
 void EXAFSGA::initPopulation(std::vector< std::vector<PDBAtom> > population) {
 
+	this->best_individuals.clear();
 	this->population.clear();
 	for (std::vector< std::vector<PDBAtom> >::iterator i = population.begin(); i != population.end(); ++i) {
 		
@@ -330,7 +331,11 @@ void EXAFSGA::finalStats() {
 
 bool EXAFSGA::convergence() {
 
-	return this->convergence(1);
+	std::vector<Chromosome> population_copy = this->population;
+	std::sort(population_copy.begin(), population_copy.end(), chromosome_sort);
+	std::vector<Chromosome>::iterator it = std::unique(population_copy.begin(), population_copy.end());
+
+	return std::distance(population_copy.begin(), it) == 1;
 }
 
 bool EXAFSGA::convergence(double rate) {
@@ -338,8 +343,6 @@ bool EXAFSGA::convergence(double rate) {
 	std::vector<Chromosome> population_copy = this->population;
 	std::sort(population_copy.begin(), population_copy.end(), chromosome_sort);
 	std::vector<Chromosome>::iterator it = std::unique(population_copy.begin(), population_copy.end());
-
-	std::cout << std::distance(population_copy.begin(), it) << "," << (rate * this->population.size()) << std::endl;
 
 	return std::distance(population_copy.begin(), it) <= (rate * this->population.size());
 }
