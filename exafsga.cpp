@@ -49,12 +49,16 @@ void EXAFSGA::begin(std::vector< std::vector< std::vector<PDBAtom> > > initial_p
 	}
 }
 
+bool chromosome_sort(Chromosome const & a, Chromosome const & b) {
+	return a.exafs_score < b.exafs_score;
+}
+
 void EXAFSGA::begin_recentering(std::vector< std::vector< std::vector<PDBAtom> > > initial_populations, int population_size, double convergence_rate, int max_iterations) {
 
 	for (int i = 0; i < (int)initial_populations.size(); ++i) {
 
 		std::cout << "Begin Run " << (i+1) << std::endl;
-		
+
 		std::stringstream ss;
 		ss << (i+1);
 		this->stats_folder = "run" + ss.str();
@@ -82,7 +86,7 @@ void EXAFSGA::begin_recentering(std::vector< std::vector< std::vector<PDBAtom> >
 					std::cout << "Converged" << std::endl;
 
 					std::vector<Chromosome> population_copy = this->population;
-					std::sort(population_copy.begin(), population_copy.end(), [](Chromosome const & a, Chromosome const & b) -> bool { return a.exafs_score < b.exafs_score; });
+					std::sort(population_copy.begin(), population_copy.end(), chromosome_sort);
 					std::vector<Chromosome>::iterator it = std::unique(population_copy.begin(), population_copy.end());
 					population_copy.resize( std::distance(population_copy.begin(), it) );
 
@@ -332,7 +336,7 @@ bool EXAFSGA::convergence() {
 bool EXAFSGA::convergence(double rate) {
 
 	std::vector<Chromosome> population_copy = this->population;
-	std::sort(population_copy.begin(), population_copy.end(), [](Chromosome const & a, Chromosome const & b) -> bool { return a.exafs_score < b.exafs_score; });
+	std::sort(population_copy.begin(), population_copy.end(), chromosome_sort);
 	std::vector<Chromosome>::iterator it = std::unique(population_copy.begin(), population_copy.end());
 
 	std::cout << std::distance(population_copy.begin(), it) << "," << (rate * this->population.size()) << std::endl;
