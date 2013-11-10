@@ -170,7 +170,14 @@ int main(int argc, char **argv) {
 		}
 
 		std::cout << "GA: Begin" << std::endl;
-		ga.begin(initial_population);
+
+		std::vector< std::vector< std::vector<PDBAtom> > > initial_populations;
+
+		for (int i = 0; i < ga_config.getInt("runs"); ++i) {
+			initial_populations.push_back(initial_population);
+		}
+
+		ga.begin(initial_populations);
 
 	} else if (ga_config.getString("eval-type").compare("xyz") == 0) {
 		std::cout << "XYZ" << std::endl;
@@ -220,7 +227,14 @@ int main(int argc, char **argv) {
 		}
 
 		std::cout << "GA: Begin" << std::endl;
-		ga.begin(initial_population);
+
+		std::vector< std::vector< std::vector<PDBAtom> > > initial_populations;
+		
+		for (int i = 0; i < ga_config.getInt("runs"); ++i) {
+			initial_populations.push_back(initial_population);
+		}
+
+		ga.begin(initial_populations);
 
 	} else {
 		std::cout << "Other" << std::endl;

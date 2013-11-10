@@ -4,6 +4,7 @@
 #include <math.h>
 #include <limits>
 #include <sstream>
+#include <sys/stat.h>
 
 EXAFSGA::EXAFSGA(EXAFSEvaluator* exafs_evaluator, double mutation_rate, double crossover_rate, bool elitism, int max_generations, std::string results_file) {
 
@@ -20,27 +21,34 @@ EXAFSGA::~EXAFSGA() {
 	delete this->exafs_evaluator;
 }
 
-void EXAFSGA::begin(std::vector< std::vector<PDBAtom> > initial_population) {
+void EXAFSGA::begin(std::vector< std::vector< std::vector<PDBAtom> > > initial_populations) {
 
-	this->initPopulation(initial_population);
-	this->initStats();
-	this->recordStats();
+	for (int i = 0; i < (int)initial_populations.size(); ++i) {
+		
+		this->stats_folder = "run" + std::to_string(i+1);
+		mkdir(this->stats_folder.c_str(), 0755);
 
-	std::cout << "Begin" << std::endl;
-	for (int i = 0; i < this->max_generations; ++i) {
-		std::cout << "Generation: " << (i+1) << std::endl;
-		this->evolve();
+		this->initPopulation(initial_populations[i]);
+		this->initStats();
+		this->recordStats();
 
-		this->saveBestChromosome();
+		std::cout << "Begin Run " << (i+1) << std::endl;
+		for (int i = 0; i < this->max_generations; ++i) {
+			std::cout << "Generation: " << (i+1) << std::endl;
+			this->evolve();
 
-		if (this->convergence()) break;
+			this->saveBestChromosome();
+
+			if (this->convergence()) break;
+		}
+
+		this->finalStats();
 	}
-
-	this->finalStats();
 }
 
 void EXAFSGA::initPopulation(std::vector< std::vector<PDBAtom> > population) {
 
+	this->population.clear();
 	for (std::vector< std::vector<PDBAtom> >::iterator i = population.begin(); i != population.end(); ++i) {
 		
 		Chromosome child(*i);
@@ -200,7 +208,7 @@ double EXAFSGA::unifRand() {
 
 void EXAFSGA::initStats() {
 
-	this->output_stream.open(this->results_file.c_str());
+	this->output_stream.open(( this->stats_folder + "/" + this->results_file).c_str());
 	if (this->output_stream.is_open()) {
 		std::cout << "Results file ready." << std::endl;
 	} else {
@@ -233,7 +241,7 @@ void EXAFSGA::finalStats() {
 	this->output_stream.close();
 
 	std::vector< std::pair<double, double> > target_exafs = this->exafs_evaluator->getTargetEXAFS();
-	std::ofstream output("generation_data.csv");
+	std::ofstream output(this->stats_folder + "/generation_data.csv");
 	for (int i = 0; i < (int)this->best_individuals[0].exafs_data.size(); ++i) {
 		
 		output << this->best_individuals[0].exafs_data[i].first;
@@ -251,9 +259,9 @@ void EXAFSGA::finalStats() {
 		output << std::endl;
 	}
 	output.close();
-	
+
 	this->exafs_evaluator->updateAtoms(this->best_individuals[this->best_individuals.size()-1].atoms);
-	this->exafs_evaluator->writePDB("best_chromosome.pdb");
+	this->exafs_evaluator->writePDB(this->stats_folder + "/best_chromosome.pdb");
 	
 }
 

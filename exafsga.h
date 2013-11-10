@@ -9,7 +9,7 @@ class EXAFSGA {
 
 		EXAFSGA(EXAFSEvaluator* exafs_evaluator, double mutation_rate, double crossover_rate, bool elitism, int max_generations, std::string results_file);
 		~EXAFSGA();
-		void begin(std::vector< std::vector<PDBAtom> > initial_population);
+		void begin(std::vector< std::vector< std::vector<PDBAtom> > > initial_populations);
 
 	private:
 
@@ -22,6 +22,7 @@ class EXAFSGA {
 		std::string results_file;
 		std::ofstream output_stream;
 		std::vector<Chromosome> best_individuals;
+		std::string stats_folder;
 
 		void initPopulation(std::vector< std::vector<PDBAtom> > population);
 
