@@ -16,7 +16,7 @@ class Chromosome {
 		Chromosome( std::vector<PDBAtom> atoms );
 		Chromosome( const Chromosome& other );
 
-		bool operator==(const Chromosome& c) { return this->exafs_score == c.exafs_score && this->potential_energy == c.potential_energy; }
+		bool operator==(const Chromosome& c) { return this->exafs_score == c.exafs_score; };
 
 	private:
 
