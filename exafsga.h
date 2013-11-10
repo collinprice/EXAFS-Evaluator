@@ -10,6 +10,7 @@ class EXAFSGA {
 		EXAFSGA(EXAFSEvaluator* exafs_evaluator, double mutation_rate, double crossover_rate, bool elitism, int max_generations, std::string results_file);
 		~EXAFSGA();
 		void begin(std::vector< std::vector< std::vector<PDBAtom> > > initial_populations);
+		void begin_recentering(std::vector< std::vector< std::vector<PDBAtom> > > initial_populations, int population_size, double convergence_rate, int max_iterations);
 
 	private:
 
@@ -45,4 +46,5 @@ class EXAFSGA {
 		void finalStats();
 
 		bool convergence();
+		bool convergence(double rate);
 };

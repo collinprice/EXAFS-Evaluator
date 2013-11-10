@@ -179,6 +179,43 @@ int main(int argc, char **argv) {
 
 		ga.begin(initial_populations);
 
+	} else if (ga_config.getString("eval-type").compare("ga_recenter") == 0) {
+		std::cout << "GA Recentering" << std::endl;
+
+		EXAFSGA ga(exafs_evaluator, ga_config.getDouble("mutation"), ga_config.getDouble("crossover"), ga_config.getBool("elitism"), ga_config.getInt("max-generations"), ga_config.getString("results"));
+
+		std::cout << "Getting initial population." << std::endl;
+
+		std::vector< std::vector<PDBAtom> > initial_population;
+		switch (ga_config.getInt("population-type")) {
+			case 0: {
+				std::vector< std::vector<PDBAtom> > initial_dcd_population = DCDHelper::getXYZs(ga_config.getString("dcd-file"), ga_config.getInt("recentering-population"));
+				for (std::vector< std::vector<PDBAtom> >::iterator i = initial_dcd_population.begin(); i != initial_dcd_population.end(); ++i) {
+
+					pdb_helper->updateEXAFSAtomsFromXYZ(*i);
+					initial_population.push_back( pdb_helper->getEXAFSAtoms() );
+				}
+				break;
+			}
+			case 1: {
+				std::vector< std::vector<PDBAtom> > initial_exafs_population = random_population(pdb_helper->getEXAFSAtoms(), ga_config.getInt("population-size"), 0.05);
+				for (std::vector< std::vector<PDBAtom> >::iterator i = initial_exafs_population.begin(); i != initial_exafs_population.end(); ++i) {
+					initial_population.push_back( *i );
+				}
+				break;
+			}
+		}
+
+		std::cout << "GA: Begin" << std::endl;
+
+		std::vector< std::vector< std::vector<PDBAtom> > > initial_populations;
+
+		for (int i = 0; i < ga_config.getInt("runs"); ++i) {
+			initial_populations.push_back(initial_population);
+		}
+
+		ga.begin_recentering(initial_populations, ga_config.getInt("population-size"), ga_config.getDouble("convergence-rate"), ga_config.getInt("recentering"));
+
 	} else if (ga_config.getString("eval-type").compare("xyz") == 0) {
 		std::cout << "XYZ" << std::endl;
 
@@ -229,7 +266,7 @@ int main(int argc, char **argv) {
 		std::cout << "GA: Begin" << std::endl;
 
 		std::vector< std::vector< std::vector<PDBAtom> > > initial_populations;
-		
+
 		for (int i = 0; i < ga_config.getInt("runs"); ++i) {
 			initial_populations.push_back(initial_population);
 		}
