@@ -14,25 +14,4 @@
 
 # Project files
 main
-oec/energy_script.vmd
-oec/pdb_energy
-oec/0
-oec/1
-oec/2
-oec/3
-oec/*_ifeffit_script.sh
-oec/clean.sh
-oec/results.csv
-oec/xyz
-oec/best_chromosome.pdb
-oec/generation_data.csv
-oec/output.dcd
-oec/output.dcd.full
-oec/output.dcd.orig
-oec/table*
-oec/run*
-oec/temp_pdb.pdb
-log
-oec/exafs
-oec/benchmark/*.csv
-oec/*.zip
+test/*
