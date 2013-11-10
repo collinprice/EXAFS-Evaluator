@@ -26,7 +26,9 @@ void EXAFSGA::begin(std::vector< std::vector< std::vector<PDBAtom> > > initial_p
 
 	for (int i = 0; i < (int)initial_populations.size(); ++i) {
 		
-		this->stats_folder = "run" + std::to_string(i+1);
+		std::stringstream ss;
+		ss << (i+1);
+		this->stats_folder = "run" + ss.str();
 		mkdir(this->stats_folder.c_str(), 0755);
 
 		this->initPopulation(initial_populations[i]);
@@ -52,7 +54,10 @@ void EXAFSGA::begin_recentering(std::vector< std::vector< std::vector<PDBAtom> >
 	for (int i = 0; i < (int)initial_populations.size(); ++i) {
 
 		std::cout << "Begin Run " << (i+1) << std::endl;
-		this->stats_folder = "run" + std::to_string(i+1);
+		
+		std::stringstream ss;
+		ss << (i+1);
+		this->stats_folder = "run" + ss.str();
 		mkdir(this->stats_folder.c_str(), 0755);
 
 		// Get subset of population.
