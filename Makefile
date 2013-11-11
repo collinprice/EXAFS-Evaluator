@@ -14,7 +14,9 @@ CPP_SRC = \
 	ifeffithelper.cpp \
 	exafsevaluator.cpp \
 	chromosome.cpp \
+	particle.cpp \
 	exafsga.cpp \
+	exafspso.cpp \
 	dcdhelper.cpp \
 	clustering.cpp
 
