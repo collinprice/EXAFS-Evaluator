@@ -335,7 +335,7 @@ int main(int argc, char **argv) {
 		}
 
 		std::cout << "PSO: Begin" << std::endl;
-		pso.begin(initial_populations, 1);
+		pso.begin(initial_populations, 0.005);
 
 	} else {
 		std::cout << "Other" << std::endl;

@@ -31,7 +31,8 @@ Particle::Particle( const Particle& other ) : exafs_score( other.exafs_score ),
 													exafs_data( other.exafs_data ),
 													position( other.position ),
 													velocity( other.velocity ),
-													best_exafs_score( other.best_exafs_score ) {}
+													best_exafs_score( other.best_exafs_score ),
+													best_position( other.best_position ) {}
 
 void Particle::init() {
 
@@ -65,31 +66,33 @@ void Particle::update_velocity(std::vector< PDBAtom > global_best_position) {
 	for (int i = 0; i < (int)this->velocity.size(); ++i) {
 		
 		this->velocity[i][0] *= (inertia * this->velocity[i][0]) +
-			(unifRand2()*social) * global_best_position[i].x - this->position[i].x + 
-			(unifRand2()*cognitive) * this->best_position[i].x - this->position[i].x;
+			((unifRand2()*social) * global_best_position[i].x - this->position[i].x) + 
+			((unifRand2()*cognitive) * this->best_position[i].x - this->position[i].x);
 
 		this->velocity[i][1] *= (inertia * this->velocity[i][1]) +
-			(unifRand2()*social) * global_best_position[i].y - this->position[i].y + 
-			(unifRand2()*cognitive) * this->best_position[i].y - this->position[i].y;
+			((unifRand2()*social) * global_best_position[i].y - this->position[i].y) + 
+			((unifRand2()*cognitive) * this->best_position[i].y - this->position[i].y);
 
 		this->velocity[i][2] *= (inertia * this->velocity[i][2]) +
-			(unifRand2()*social) * global_best_position[i].z - this->position[i].z + 
-			(unifRand2()*cognitive) * this->best_position[i].z - this->position[i].z;
+			((unifRand2()*social) * global_best_position[i].z - this->position[i].z) + 
+			((unifRand2()*cognitive) * this->best_position[i].z - this->position[i].z);
 
-		std::cout << this->velocity[i][0] << std::endl;
+		// std::cout << this->velocity[i][0] << std::endl;
 	}
 }
 
 void Particle::update_position() {
 
-	for (int i = 0; i < (int)this->position.size(); ++i) {
+	for (int i = 0; i < (int)this->velocity.size(); ++i) {
 		
-		std::cout << this->velocity[i][0] << std::endl;
-		std::cout << this->position[i].x << std::endl;
+		// std::cout << this->velocity[i][0] << std::endl;
+		// std::cout << "Before:" << this->position[i].x << std::endl;
 
 		this->position[i].x = this->velocity[i][0] + this->position[i].x;
 		this->position[i].y = this->velocity[i][1] + this->position[i].y;
 		this->position[i].z = this->velocity[i][2] + this->position[i].z;
+
+		// std::cout << "After:" << this->position[i].x << std::endl;
 	}
 }
 

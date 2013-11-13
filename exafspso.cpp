@@ -65,10 +65,7 @@ void EXAFSPSO::initPopulation(std::vector< std::vector<PDBAtom> > population, do
 
 void EXAFSPSO::evaluatePopulation() {
 	for (int i = 0; i < (int)this->population.size(); ++i) {
-		if (!this->population[i].is_evaluated) {
-			this->evaluate(this->population[i]);
-			this->population[i].is_evaluated = true;
-		}
+		this->evaluate(this->population[i]);
 		std::cout << "\t Child: " << i << ", " << this->population[i].exafs_score << std::endl;
 	}
 }
