@@ -30,6 +30,7 @@ public:
 	*/
 	std::vector<PDBAtom> getEXAFSAtoms();
 
+	std::vector<PDBAtom> getAllEXAFSAtoms();
 
 	void updateEXAFSAtoms(std::vector<PDBAtom> atoms);
 

@@ -51,6 +51,19 @@ std::vector<PDBAtom> PDBHelper::getEXAFSAtoms() {
 
 	return exafs_atoms;
 }
+
+std::vector<PDBAtom> PDBHelper::getAllEXAFSAtoms() {
+
+	std::vector<PDBAtom> exafs_atoms;
+
+	for (int i = 0; i < N; ++i) {
+		if (this->validEXAFSIndex(i)) {
+			exafs_atoms.push_back(PDBAtom(this->atomAtIndex(i), i, X[i], Y[i], Z[i]));
+		}
+	}
+
+	return exafs_atoms;
+}
 	
 void PDBHelper::updateEXAFSAtoms(std::vector<PDBAtom> atoms) {
 
