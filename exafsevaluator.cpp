@@ -26,7 +26,7 @@ void EXAFSEvaluator::updateAtoms(std::vector<PDBAtom> atoms) {
 
 double EXAFSEvaluator::calculateRMSD() {
 
-	return this->ifeffit_helper->run(this->pdb_helper->getAllEXAFSAtoms(), true);
+	return this->ifeffit_helper->run(this->pdb_helper->getAllEXAFSAtoms(), false);
 }
 
 double EXAFSEvaluator::calculatePotentialEnergy() {
