@@ -300,7 +300,12 @@ int main(int argc, char **argv) {
 		std::vector< std::vector< std::vector<PDBAtom> > > initial_populations;
 
 		for (int i = 0; i < ga_config.getInt("runs"); ++i) {
-			initial_populations.push_back(initial_population);
+			
+			// Get subset of population.
+			std::random_shuffle(initial_population.begin(), initial_population.end());
+			std::vector< std::vector<PDBAtom> > subset_pop = std::vector< std::vector<PDBAtom> >(initial_population.begin(), initial_population.begin()+ga_config.getInt("recentering-population"));
+
+			initial_populations.push_back(subset_pop);
 		}
 		
 		ga.begin_recentering(initial_populations, ga_config.getInt("population-size"), ga_config.getDouble("convergence-rate"), ga_config.getInt("recentering"));
