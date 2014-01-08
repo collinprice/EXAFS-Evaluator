@@ -1,3 +1,4 @@
+#pragma once
 #include "pdbatom.h"
 
 #include <string>

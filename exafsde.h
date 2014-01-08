@@ -4,21 +4,19 @@
 #include <vector>
 #include <fstream>
 
-class EXAFSGA {
+class EXAFSDE {
 	public:
 
-		EXAFSGA(EXAFSEvaluator* exafs_evaluator, double mutation_rate, double crossover_rate, bool elitism, int max_generations, std::string results_file);
-		~EXAFSGA();
+		EXAFSDE(EXAFSEvaluator* exafs_evaluator, double f, double cr, int max_generations, std::string results_file);
+		~EXAFSDE();
 		void begin(std::vector< std::vector< std::vector<PDBAtom> > > initial_populations);
-		void begin_recentering(std::vector< std::vector< std::vector<PDBAtom> > > initial_populations, int population_size, double convergence_rate, int max_iterations);
 
 	private:
 
 		std::vector<Chromosome> population;
 		EXAFSEvaluator* exafs_evaluator;
-		double mutation_rate;
-		double crossover_rate;
-		bool elitism;
+		double f;
+		double cr;
 		int max_generations;
 		std::string results_file;
 		std::ofstream output_stream;
@@ -28,18 +26,17 @@ class EXAFSGA {
 		void initPopulation(std::vector< std::vector<PDBAtom> > population);
 
 		void evolve();
-		Chromosome selection();
+
+		Chromosome mutate(int i, int r1, int r2, int r3);
 
 		void evaluate( Chromosome& child );
 		void evaluatePopulation();
-
-		void crossover(Chromosome& p1, Chromosome& p2);
-		void mutate(Chromosome& child);
 
 		Chromosome best_chromosome();
 		void saveBestChromosome();
 
 		double unifRand();
+		double randInt(int max);
 
 		void initStats();
 		void recordStats();

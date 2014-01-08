@@ -33,6 +33,18 @@ public:
 	static std::string atomicNumberToSymbol(int atomic_number);
 	static int atomicSymbolToNumber(std::string atomic_symbol);
 
+	PDBAtom operator+(const PDBAtom& c) {
+		return PDBAtom(this->atomic_symbol, this->index, this->x + c.x, this->y + c.y, this->z + c.z);
+	};
+
+	PDBAtom operator-(const PDBAtom& c) {
+		return PDBAtom(this->atomic_symbol, this->index, this->x - c.x, this->y - c.y, this->z - c.z);
+	};
+
+	PDBAtom operator*(const double& c) {
+		return PDBAtom(this->atomic_symbol, this->index, this->x * c, this->y * c, this->z * c);
+	};
+
 private:
 
 	int index;

@@ -1,3 +1,4 @@
+#pragma once
 #include "ifeffithelper.h"
 #include "pdbhelper.h"
 #include "vmdhelper.h"
