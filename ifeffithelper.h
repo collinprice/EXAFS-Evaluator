@@ -35,12 +35,14 @@ private:
 	double x_max;
 
 	void readTargetEXAFS(std::string filename);
-	void updateProcessFiles();
+	bool updateProcessFiles();
 	bool generateFEFFFile(std::vector<PDBAtom> atomic_coordinates, int index, std::string filename);
 	bool updateFEFFFiles(std::vector<PDBAtom> atomic_coordinates);
 	void processIFEFFIT(bool threaded);
 	static void staticEntry(const char* command);
 	double calculateRMSD();
+
+	double failedAttempt();
 
 	bool canPerformIFEFFITCalculations();
 	void removeAllCalculatedEXAFSFiles();

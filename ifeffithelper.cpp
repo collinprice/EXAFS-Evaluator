@@ -165,10 +165,13 @@ double IFEFFITHelper::run(std::vector<PDBAtom> updated_atoms, bool threaded) {
 
 	this->removeAllCalculatedEXAFSFiles(); // Clean up before run.
 	this->updateFEFFFiles(updated_atoms);
-	this->updateProcessFiles();
-	this->processIFEFFIT(threaded);
-
-	return this->calculateRMSD();
+	
+	if (this->updateProcessFiles()) {
+		this->processIFEFFIT(threaded);
+		return this->calculateRMSD();
+	}
+	
+	return this->failedAttempt();
 }
 
 double IFEFFITHelper::run(std::string atoms_file, bool threaded) {
@@ -225,7 +228,7 @@ void IFEFFITHelper::readTargetEXAFS(std::string filename) {
 	}
 }
 
-void IFEFFITHelper::updateProcessFiles() {
+bool IFEFFITHelper::updateProcessFiles() {
 
 	std::string ifeffit_header[] = {
 		"read_data(file=" + this->target_exafs_filename + ",type=chi,group=data)",
@@ -257,7 +260,7 @@ void IFEFFITHelper::updateProcessFiles() {
 
 		std::ifstream process_file((folder_name + "/" + oss.str() + "/process_files.dat").c_str());
 		if (!process_file.is_open()) {
-			// return false;
+			return false;
 		}
 
 		std::vector<std::string> files;
@@ -270,10 +273,13 @@ void IFEFFITHelper::updateProcessFiles() {
 		process_file.close();
 		unlink((folder_name + "/" + oss.str() + "/process_files.dat").c_str());
 
+		if (files.size() == 0) {
+			return false;
+		}
 
 		std::ofstream ifeffit_file((folder_name + "/" + oss.str() + "/process.iff").c_str());
 		if (!ifeffit_file.is_open()) {
-			// return false;
+			return false;
 		}
 
 		int temp_size = sizeof(ifeffit_header)/sizeof(ifeffit_header[0]);
@@ -295,6 +301,8 @@ void IFEFFITHelper::updateProcessFiles() {
 		oss.clear();
 		oss.str("");
 	}
+
+	return true;
 }
 
 bool IFEFFITHelper::generateFEFFFile(std::vector<PDBAtom> atomic_coordinates, int index, std::string filename) {
@@ -385,7 +393,7 @@ double IFEFFITHelper::calculateRMSD() {
 
 	// Check that all output files are there. If there are any missing then ifeffit failed.
 	if (!this->canPerformIFEFFITCalculations()) {
-		return std::numeric_limits<double>::max();
+		return this->failedAttempt();
 	}
 
 	// Read in target_indexes output files.
@@ -480,13 +488,6 @@ bool IFEFFITHelper::canPerformIFEFFITCalculations() {
 void IFEFFITHelper::removeAllCalculatedEXAFSFiles() {
 
 	system(("bash " + folder_name + "/" + IFEFFITHelper::CLEAN_SCRIPT).c_str());
-	// for (int i = 0; i < (int)this->target_indexes.size(); ++i) {
-	// 	std::ostringstream oss;
-	// 	oss << i;
-	// 	std::string filename = folder_name + "/" + oss.str() + "/" + IFEFFITHelper::CALCULATED_EXAFS_FILENAME;
-	// 	std::cout <<  << std::endl;
-	// 	system(("rm -rf " + filename + " " + "chip* feff* chi.dat feff.err feff.run files.dat nstar.dat paths.dat phase.bin sig2.dat").c_str());
-	// }
 }
 
 void IFEFFITHelper::generateCleanCalculatedEXAFSFilesScript() {
@@ -497,17 +498,25 @@ void IFEFFITHelper::generateCleanCalculatedEXAFSFilesScript() {
 		clean_script << "rm -f " << folder_name << "/" << i << "/" << IFEFFITHelper::CALCULATED_EXAFS_FILENAME << std::endl;
 		clean_script << "rm -f " << folder_name << "/" << i << "/" << "chip*" << std::endl;
 		clean_script << "rm -f " << folder_name << "/" << i << "/" << "feff*" << std::endl;
-		// clean_script << "rm " << folder_name << "/" << i << "/" << "chi.dat" << std::endl;
-		// clean_script << "rm " << folder_name << "/" << i << "/" << "feff.err" << std::endl;
-		// clean_script << "rm " << folder_name << "/" << i << "/" << "feff.run" << std::endl;
-		// clean_script << "rm " << folder_name << "/" << i << "/" << "files.dat" << std::endl;
-		// clean_script << "rm " << folder_name << "/" << i << "/" << "nstar.dat" << std::endl;
-		// clean_script << "rm " << folder_name << "/" << i << "/" << "paths.dat" << std::endl;
-		// clean_script << "rm " << folder_name << "/" << i << "/" << "phase.bin" << std::endl;
-		// clean_script << "rm " << folder_name << "/" << i << "/" << "sig2.dat" << std::endl;
+		clean_script << "rm -f " << folder_name << "/" << i << "/" << "chi.dat" << std::endl;
+		clean_script << "rm -f " << folder_name << "/" << i << "/" << "feff.err" << std::endl;
+		clean_script << "rm -f " << folder_name << "/" << i << "/" << "feff.run" << std::endl;
+		clean_script << "rm -f " << folder_name << "/" << i << "/" << "feff.inp" << std::endl;
+		clean_script << "rm -f " << folder_name << "/" << i << "/" << "files.dat" << std::endl;
+		clean_script << "rm -f " << folder_name << "/" << i << "/" << "nstar.dat" << std::endl;
+		clean_script << "rm -f " << folder_name << "/" << i << "/" << "paths.dat" << std::endl;
+		clean_script << "rm -f " << folder_name << "/" << i << "/" << "phase.bin" << std::endl;
+		clean_script << "rm -f " << folder_name << "/" << i << "/" << "sig2.dat" << std::endl;
+		clean_script << "rm -f " << folder_name << "/" << i << "/" << "process.iff" << std::endl;
 		clean_script << std::endl;
 
 	}
 
 	clean_script.close();
+}
+
+double IFEFFITHelper::failedAttempt() {
+
+	this->averaged_calculated_data.clear();
+	return 1500;
 }

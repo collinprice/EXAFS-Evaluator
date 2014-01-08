@@ -153,8 +153,10 @@ Chromosome EXAFSDE::mutate(int i, int r1, int r2, int r3) {
 	std::cout << "\t Child: " << i << ", Original: " << originalChromosome.exafs_score << ", Modified: " << selectedChromosome.exafs_score << std::endl;
 
 	if (originalChromosome.exafs_score < selectedChromosome.exafs_score) {
+		std::cout << "\t Child: " << i << ", Original: " << originalChromosome.exafs_score << std::endl;
 		return originalChromosome;
 	} else {
+		std::cout << "\t Child: " << i << ", Modified: " << selectedChromosome.exafs_score << std::endl;
 		return selectedChromosome;
 	}
 }
