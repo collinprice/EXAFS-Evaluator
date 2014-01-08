@@ -10,6 +10,7 @@ class EXAFSDE {
 		EXAFSDE(EXAFSEvaluator* exafs_evaluator, double f, double cr, int max_generations, std::string results_file);
 		~EXAFSDE();
 		void begin(std::vector< std::vector< std::vector<PDBAtom> > > initial_populations);
+		void begin_recentering(std::vector< std::vector< std::vector<PDBAtom> > > initial_populations, int population_size, double keep_percentage, int max_iterations);
 
 	private:
 
