@@ -13,8 +13,8 @@ Particle::Particle(double range, std::vector<PDBAtom> atoms) : Chromosome(atoms)
 		velocity.push_back(PDBAtom(this->randomRange(range),this->randomRange(range),this->randomRange(range)));
 	}
 
-	this->best_exafs_score = -1;
-	this->best_potential_energy = -1;
+	this->best_exafs_score = 9999;
+	this->best_potential_energy = 9999;
 }
 
 Particle::Particle(const Particle& other) 
