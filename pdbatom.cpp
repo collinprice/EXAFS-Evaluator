@@ -1,6 +1,14 @@
 #include "pdbatom.h"
 #include "math.h"
 
+PDBAtom::PDBAtom(double x, double y, double z) {
+
+	this->index = -1;
+	this->x = x;
+	this->y = y;
+	this->z = z;
+}
+
 PDBAtom::PDBAtom(int index, double x, double y, double z) {
 
 	this->index = index;
