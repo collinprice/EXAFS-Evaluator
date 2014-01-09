@@ -1,6 +1,7 @@
 #include "genfig/genfig.h"
 #include "exafsga.h"
 #include "exafsde.h"
+#include "exafspso.h"
 #include "dcdhelper.h"
 #include "clustering.h"
 
@@ -373,6 +374,37 @@ int main(int argc, char **argv) {
 		}
 		
 		de.begin_recentering(initial_populations, ga_config.getInt("population-size"), ga_config.getDouble("keep-percentage"), ga_config.getInt("recentering"));
+
+	} else if (ga_config.getString("eval-type").compare("index_pso") == 0) {
+
+		std::cout << "Index_PSO" << std::endl;
+
+		std::vector<int> indexes = dcdGetIndexLessThan(ga_config.getString("index-file"), ga_config.getDouble("index-max"));
+		std::vector< std::vector<PDBAtom> > initial_population;
+
+		EXAFSPSO pso(exafs_evaluator, ga_config.getDouble("velocity-range"), ga_config.getInt("max-generations"), ga_config.getString("results"));
+
+		std::vector< std::vector<PDBAtom> > initial_dcd_population = DCDHelper::getXYZsByIndex(ga_config.getString("dcd-file"), indexes);
+		std::cout << "DCD Population = " << initial_dcd_population.size() << std::endl;
+		for (std::vector< std::vector<PDBAtom> >::iterator i = initial_dcd_population.begin(); i != initial_dcd_population.end(); ++i) {
+
+			pdb_helper->updateEXAFSAtomsFromXYZ(*i);
+			initial_population.push_back( pdb_helper->getEXAFSAtoms() );
+		}
+
+		std::vector< std::vector< std::vector<PDBAtom> > > initial_populations;
+
+		for (int i = 0; i < ga_config.getInt("runs"); ++i) {
+			
+			// Get subset of population.
+			std::random_shuffle(initial_population.begin(), initial_population.end());
+			std::vector< std::vector<PDBAtom> > subset_pop = std::vector< std::vector<PDBAtom> >(initial_population.begin(), initial_population.begin()+ga_config.getInt("population-size"));
+
+			initial_populations.push_back(subset_pop);
+		}
+
+		std::cout << "PSO: Begin" << std::endl;
+		pso.begin(initial_populations);
 
 	} else {
 		std::cout << "Other" << std::endl;

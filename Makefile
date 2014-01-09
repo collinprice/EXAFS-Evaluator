@@ -17,7 +17,9 @@ CPP_SRC = \
 	exafsga.cpp \
 	dcdhelper.cpp \
 	clustering.cpp \
-	exafsde.cpp
+	exafsde.cpp \
+	particle.cpp \
+	exafspso.cpp
 
 CPP_SRC_OBJS = $(CPP_SRC:.cpp=.o)
 

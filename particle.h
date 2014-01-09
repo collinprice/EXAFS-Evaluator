@@ -12,5 +12,14 @@ class Particle : public Chromosome {
 		std::vector< PDBAtom > velocity;
 
 		Particle();
+		Particle(double range, std::vector<PDBAtom> atoms);
+		Particle(const Particle& other);
+
+		void updateBest();
+		void updatePosition();
+		void updateVelocity(Particle global_best);
 	
+	private:
+		double unifRand();
+		double randomRange(double max);
 };
