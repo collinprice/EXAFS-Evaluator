@@ -21,6 +21,10 @@ EXAFSDE::~EXAFSDE() {
 	delete this->exafs_evaluator;
 }
 
+bool chromosome_sort_de(Chromosome const & a, Chromosome const & b) {
+	return a.exafs_score < b.exafs_score;
+}
+
 void EXAFSDE::begin(std::vector< std::vector< std::vector<PDBAtom> > > initial_populations) {
 
 	for (int i = 0; i < (int)initial_populations.size(); ++i) {
@@ -40,7 +44,6 @@ void EXAFSDE::begin(std::vector< std::vector< std::vector<PDBAtom> > > initial_p
 			this->evolve();
 
 			this->saveBestChromosome();
-
 			if (this->convergence()) break;
 		}
 
@@ -48,8 +51,81 @@ void EXAFSDE::begin(std::vector< std::vector< std::vector<PDBAtom> > > initial_p
 	}
 }
 
-bool chromosome_sort_de(Chromosome const & a, Chromosome const & b) {
-	return a.exafs_score < b.exafs_score;
+void EXAFSDE::begin_recentering(std::vector< std::vector< std::vector<PDBAtom> > > initial_populations, int population_size, double keep_percentage, int max_iterations) {
+
+	for (int i = 0; i < (int)initial_populations.size(); ++i) {
+
+		std::cout << "Begin Run " << (i+1) << std::endl;
+
+		std::stringstream ss;
+		ss << (i+1);
+		this->stats_folder = "run" + ss.str();
+		mkdir(this->stats_folder.c_str(), 0755);
+
+		// Get subset of population.
+		std::random_shuffle(initial_populations[i].begin(), initial_populations[i].end());
+		std::vector< std::vector<PDBAtom> > subset_pop = std::vector< std::vector<PDBAtom> >(initial_populations[i].begin(), initial_populations[i].begin()+population_size);
+
+		this->initPopulation(subset_pop);
+		this->initStats();
+		this->recordStats();
+
+		for (int j = 0; j < max_iterations; ++j) {
+			
+			std::cout << "Iteration: " << (j+1) << std::endl;
+			for (int epoch = 0; epoch < this->max_generations; ++epoch) {
+				std::cout << "Generation: " << (epoch+1) << std::endl;
+				this->evolve();
+
+				this->saveBestChromosome();
+				if (this->convergence()) break;
+			}
+
+			// Lets restart the population using some of the existing population.
+			std::vector<Chromosome> population_copy = this->population;
+
+			// Sort and keep best candidates.
+			std::sort(population_copy.begin(), population_copy.end(), chromosome_sort_de);
+			population_copy.resize( population_copy.size()*keep_percentage );
+
+			std::cout << "Keep size = " << population_copy.size() << std::endl;
+
+			// Shuffle library again and get subset minus keep percentage
+			std::random_shuffle(initial_populations[i].begin(), initial_populations[i].end());
+			subset_pop = std::vector< std::vector<PDBAtom> >(initial_populations[i].begin(), initial_populations[i].begin()+(population_size-(int)population_copy.size()));
+
+			for (std::vector<Chromosome>::iterator iter = population_copy.begin(); iter != population_copy.end(); ++iter) {
+				subset_pop.push_back(iter->atoms);
+			}
+
+			std::cout << "New size = " << subset_pop.size() << std::endl;
+
+			this->initPopulation(subset_pop);
+			this->recordStats();
+
+			// if (j != (max_iterations-1) && this->convergence(convergence_rate)) {
+
+			// std::cout << "Converged" << std::endl;
+
+			// std::vector<Chromosome> population_copy = this->population;
+			// std::sort(population_copy.begin(), population_copy.end(), chromosome_sort_de);
+			// std::vector<Chromosome>::iterator it = std::unique(population_copy.begin(), population_copy.end());
+			// population_copy.resize( std::distance(population_copy.begin(), it) );
+
+			
+
+			// for (std::vector<Chromosome>::iterator iter = population_copy.begin(); iter != population_copy.end(); ++iter) {
+			// 	subset_pop.push_back(iter->atoms);
+			// }
+
+			// this->initPopulation(subset_pop);
+			// this->recordStats();
+			// break;
+				// }
+		}
+
+		this->finalStats();
+	}
 }
 
 void EXAFSDE::initPopulation(std::vector< std::vector<PDBAtom> > population) {
