@@ -27,9 +27,8 @@ Particle::Particle(const Particle& other)
 
 void Particle::updateBest() {
 
-	std::cout << "updating personal best" << std::endl;
 	if (this->exafs_score < this->best_exafs_score) {
-		std::cout << "updated" << std::endl;
+		
 		this->best_exafs_score = this->exafs_score;
 		this->best_exafs_data = this->exafs_data;
 		this->best_atoms = this->atoms;
@@ -50,14 +49,13 @@ void Particle::updateVelocity(Particle global_best) {
 	double cognitive = social;
 	
 	for (int i = 0; i < (int)this->atoms.size(); ++i) {
-		
-		std::cout << "1: " << this->best_atoms[i].x << std::endl;
-		std::cout << "2: " << this->atoms[i].x << std::endl;
 
 		this->velocity[i] = this->velocity[i]*inertia 
 		+ (this->best_atoms[i]-this->atoms[i])*social*this->unifRand()
 		+ (global_best.atoms[i]-this->atoms[i])*cognitive*this->unifRand();
 	}
+
+	this->is_evaluated = false;
 }
 
 double Particle::unifRand() {

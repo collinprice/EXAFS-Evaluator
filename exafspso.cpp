@@ -139,6 +139,7 @@ void EXAFSPSO::saveBestParticle() {
 	this->best_individuals.push_back(best_individual);
 
 	std::cout << "Best: " << best_individual.exafs_score << std::endl;
+	std::cout << "Global Best: " << global_best_particle.exafs_score << std::endl;
 }
 
 double EXAFSPSO::unifRand() {
@@ -195,7 +196,7 @@ void EXAFSPSO::finalStats() {
 		} else {
 			output << ",0";
 		}
-
+		
 		for (int j = 0; j < (int)this->best_individuals.size(); ++j) {
 			
 			output << "," << this->best_individuals[j].exafs_data[i].second;
