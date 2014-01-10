@@ -7,10 +7,13 @@
 #include <sys/stat.h>
 #include <algorithm>
 
-EXAFSPSO::EXAFSPSO(EXAFSEvaluator* exafs_evaluator, double velocity_range, int max_generations, std::string results_file) {
+EXAFSPSO::EXAFSPSO(EXAFSEvaluator* exafs_evaluator, double inertia, double social, double cognitive, double velocity_range, int max_generations, std::string results_file) {
 
 	this->exafs_evaluator = exafs_evaluator;
 	this->velocity_range = velocity_range;
+	this->inertia = inertia;
+	this->social = social;
+	this->cognitive = cognitive;
 	this->max_generations = max_generations;
 	this->results_file = results_file;
 }
@@ -44,7 +47,7 @@ void EXAFSPSO::begin(std::vector< std::vector< std::vector<PDBAtom> > > initial_
 		for (int i = 0; i < this->max_generations; ++i) {
 			std::cout << "Generation: " << (i+1) << std::endl;
 
-			this->updateVelocities(global_best_particle);
+			this->updateVelocities();
 			this->updatePositions();
 
 			this->evaluatePopulation();
@@ -60,10 +63,10 @@ void EXAFSPSO::begin(std::vector< std::vector< std::vector<PDBAtom> > > initial_
 	}
 }
 
-void EXAFSPSO::updateVelocities(Particle best) {
+void EXAFSPSO::updateVelocities() {
 
 	for (int i = 0; i < (int)this->population.size(); ++i) {
-		this->population[i].updateVelocity(best);
+		this->population[i].updateVelocity(this->global_best_particle,this->inertia,this->social,this->cognitive);
 	}
 }
 
@@ -199,6 +202,8 @@ void EXAFSPSO::finalStats() {
 		
 		for (int j = 0; j < (int)this->best_individuals.size(); ++j) {
 			
+			if ((int)this->best_individuals[j].exafs_data.size() == j) continue; // guard for no exafs data. occurs when no individuals are valid.
+
 			output << "," << this->best_individuals[j].exafs_data[i].second;
 		}
 		output << std::endl;

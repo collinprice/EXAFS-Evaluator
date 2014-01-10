@@ -17,7 +17,7 @@ class Particle : public Chromosome {
 
 		void updateBest();
 		void updatePosition();
-		void updateVelocity(Particle global_best);
+		void updateVelocity(Particle global_best, double inertia, double social, double cognitive);
 	
 	private:
 		double unifRand();

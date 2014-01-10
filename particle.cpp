@@ -42,11 +42,7 @@ void Particle::updatePosition() {
 	}
 }
 
-void Particle::updateVelocity(Particle global_best) {
-
-	double inertia = 2;
-	double social = 1.496180;
-	double cognitive = social;
+void Particle::updateVelocity(Particle global_best, double inertia, double social, double cognitive) {
 	
 	for (int i = 0; i < (int)this->atoms.size(); ++i) {
 

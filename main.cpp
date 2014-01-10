@@ -382,7 +382,7 @@ int main(int argc, char **argv) {
 		std::vector<int> indexes = dcdGetIndexLessThan(ga_config.getString("index-file"), ga_config.getDouble("index-max"));
 		std::vector< std::vector<PDBAtom> > initial_population;
 
-		EXAFSPSO pso(exafs_evaluator, ga_config.getDouble("velocity-range"), ga_config.getInt("max-generations"), ga_config.getString("results"));
+		EXAFSPSO pso(exafs_evaluator, ga_config.getDouble("inertia"), ga_config.getDouble("social"), ga_config.getDouble("cognitive"), ga_config.getDouble("velocity-range"), ga_config.getInt("max-generations"), ga_config.getString("results"));
 
 		std::vector< std::vector<PDBAtom> > initial_dcd_population = DCDHelper::getXYZsByIndex(ga_config.getString("dcd-file"), indexes);
 		std::cout << "DCD Population = " << initial_dcd_population.size() << std::endl;

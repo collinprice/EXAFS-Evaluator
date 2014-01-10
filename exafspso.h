@@ -7,7 +7,7 @@
 class EXAFSPSO {
 	public:
 
-		EXAFSPSO(EXAFSEvaluator* exafs_evaluator, double velocity_range, int max_generations, std::string results_file);
+		EXAFSPSO(EXAFSEvaluator* exafs_evaluator, double inertia, double social, double cognitive, double velocity_range, int max_generations, std::string results_file);
 		~EXAFSPSO();
 		void begin(std::vector< std::vector< std::vector<PDBAtom> > > initial_populations);
 		// void begin_recentering(std::vector< std::vector< std::vector<PDBAtom> > > initial_populations, int population_size, double keep_percentage, int max_iterations);
@@ -18,6 +18,9 @@ class EXAFSPSO {
 		Particle global_best_particle;
 
 		EXAFSEvaluator* exafs_evaluator;
+		double inertia;
+		double social;
+		double cognitive;
 		double velocity_range;
 		
 		int max_generations;
@@ -28,7 +31,7 @@ class EXAFSPSO {
 
 		void initPopulation(std::vector< std::vector<PDBAtom> > population);
 
-		void updateVelocities(Particle best);
+		void updateVelocities();
 		void updatePositions();
 		void updateGlobalBest();
 
