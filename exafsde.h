@@ -31,6 +31,9 @@ class EXAFSDE {
 		Chromosome mutate(int i, int r1, int r2, int r3);
 
 		void evaluate( Chromosome& child );
+		void evaluateRMSD( Chromosome& child );
+		void evaluatePotentialEnergy( Chromosome& child );
+		
 		void evaluatePopulation();
 
 		Chromosome best_chromosome();

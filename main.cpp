@@ -12,6 +12,9 @@
 #include <math.h>
 #include <algorithm>
 #include <typeinfo>
+#include <sys/types.h>
+#include <dirent.h>
+#include <errno.h>
 
 double unifRand() {
         return rand() / double(RAND_MAX);
@@ -93,6 +96,23 @@ std::vector<int> dcdGetIndexLessThan(std::string filename, double limit) {
 	return indexes;
 }
 
+/*function... might want it in some class?*/
+int getdir (std::string dir, std::vector<std::string> &files)
+{
+    DIR *dp;
+    struct dirent *dirp;
+    if((dp  = opendir(dir.c_str())) == NULL) {
+        std::cout << "Error(" << errno << ") opening " << dir << std::endl;
+        return errno;
+    }
+
+    while ((dirp = readdir(dp)) != NULL) {
+        files.push_back(std::string(dirp->d_name));
+    }
+    closedir(dp);
+    return 0;
+}
+
 int main(int argc, char **argv) {
 	
 	int c;
@@ -143,6 +163,23 @@ int main(int argc, char **argv) {
 		std::cout << "Initial pdb file" << std::endl;
 	 	double initial_rmsd = ifeffit_helper->run(pdb_helper->getEXAFSAtoms(), true);
 	 	std::cout << "RMSD = " << initial_rmsd << std::endl;
+
+	} else if (ga_config.getString("eval-type").compare("dir_potential") == 0) {
+		std::cout << "Directory Potential" << std::endl;
+		std::cout << "Reading directory: " << ga_config.getString("pot-dir") << std::endl;
+
+		std::vector<std::string> files;
+		getdir(ga_config.getString("pot-dir"),files);
+
+		for (std::vector<std::string>::iterator file = files.begin(); file != files.end(); ++file) {
+			
+			std::string pdb_file = ga_config.getString("pot-dir") + "/" + *file;
+			std::cout << "Analyzing :" << pdb_file << std::endl;
+
+			PDBHelper temp_pdb_helper = PDBHelper(pdb_file, fitness_config.getString("amber-topology-file"), "temp_pdb.pdb", fitness_config.getStringList("exafs-atoms"));
+			temp_pdb_helper.writePDBFile();
+			std::cout << "Energy: " << vmd_helper->calculateEnergy() << std::endl;
+		}
 
 	} else if (ga_config.getString("eval-type").compare("ga") == 0) {
 		std::cout << "GA" << std::endl;
@@ -340,6 +377,9 @@ int main(int argc, char **argv) {
 			initial_populations.push_back(subset_pop);
 		}
 
+		DCDHelper dcd_helper = DCDHelper(ga_config.getString("dcd-file"));
+		pdb_helper->updateAllAtomsFromXYZ(dcd_helper.getXYZAtFrame(0));
+		
 		std::cout << "DE: Begin" << std::endl;
 		de.begin(initial_populations);
 
@@ -403,9 +443,41 @@ int main(int argc, char **argv) {
 			initial_populations.push_back(subset_pop);
 		}
 
+		DCDHelper dcd_helper = DCDHelper(ga_config.getString("dcd-file"));
+		pdb_helper->updateAllAtomsFromXYZ(dcd_helper.getXYZAtFrame(0));
+
 		std::cout << "PSO: Begin" << std::endl;
 		pso.begin(initial_populations);
 
+	} else if (ga_config.getString("eval-type").compare("full-dcd-potential") == 0) {
+		std::cout << "Full DCD Potential" << std::endl;
+
+		DCDHelper dcd_helper = DCDHelper(ga_config.getString("dcd-file"));
+
+		// Get all the xyz entries.
+		// std::vector< std::vector<PDBAtom> > initial_dcd_population = DCDHelper::getXYZs(ga_config.getString("dcd-file"));
+
+		std::ofstream dcd_results((std::string("dcd_potential.csv")).c_str());
+		// for (std::vector< std::vector<PDBAtom> >::iterator i = initial_dcd_population.begin(); i != initial_dcd_population.end(); ++i) {
+		for (int i = 0; i < dcd_helper.numberOfFrames(); ++i) {
+			
+			pdb_helper->updateAllAtomsFromXYZ(dcd_helper.getXYZAtFrame(i));
+			pdb_helper->writePDBFile();
+
+			double potential_energy = vmd_helper->calculateEnergy();
+			std::cout << "Energy: " << i << " - " << potential_energy << std::endl;
+
+			dcd_results << potential_energy << std::endl;
+		}
+		// 	pdb_helper->updateAllAtomsFromXYZ(*i);
+			
+		// 	pdb_helper->writePDBFile();
+		// 	double potential_energy = vmd_helper->calculateEnergy();
+		// 	std::cout << "Energy: " << potential_energy << std::endl;
+
+		// 	dcd_results << potential_energy << std::endl;
+		// }
+		dcd_results.close();
 	} else {
 		std::cout << "Other" << std::endl;
 

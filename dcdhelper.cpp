@@ -9,6 +9,37 @@ extern "C" {
 
 #define C_TEXT( text ) ((char*)std::string( text ).c_str())
 
+DCDHelper::DCDHelper(std::string filename) {
+
+	initialize_read_xyz(C_TEXT(filename));
+
+	this->x = new float[my_H.N];
+	this->y = new float[my_H.N];
+	this->z = new float[my_H.N];
+}
+
+DCDHelper::~DCDHelper() {
+
+	delete[] this->x;
+	delete[] this->y;
+	delete[] this->z;
+}
+
+int DCDHelper::numberOfFrames() {
+	return my_H.NSet;
+}
+
+std::vector<PDBAtom> DCDHelper::getXYZAtFrame(int frame) {
+
+	read_xyz(frame, x, y, z);
+	std::vector<PDBAtom> points;
+	for (int i = 0; i < my_H.N; ++i) {
+		points.push_back(PDBAtom(i, x[i], y[i], z[i]));
+	}
+
+	return points;
+}
+
 void init(std::string filename) {
 
 	initialize_read_xyz(C_TEXT(filename));

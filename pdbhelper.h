@@ -41,6 +41,9 @@ public:
 		Update atoms based on an list of atoms. XYZ files only contain atomic symbol and 3d coordinates. Indexes cannot be trusted.
 	*/
 	void updateEXAFSAtomsFromXYZ(std::vector<PDBAtom> atoms);
+
+	void updateAllAtomsFromXYZ(std::vector<PDBAtom> atoms);
+
 	// void updateAtomsFromList(std::vector<PDBAtom> atoms);
 	void writePDBFile(std::string filename);
 	void writePDBFile();

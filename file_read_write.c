@@ -200,8 +200,8 @@ int read_parm7(char *prmtop)
   fscanf(fp,"%li%li%li%li",&N,&junk,&NBONH,&NBONA);  //read NATOM
   fgets(line_buf,82,fp);
   fscanf(fp,"%li%li",&i,&NRES);
-  printf("Reading AMBER topology file:\n");
-  printf("NATOM=%li, NRES=%li, NBONH=%li, NBONA=%li\n",N,NRES,NBONH,NBONA);
+  // printf("Reading AMBER topology file:\n");
+  // printf("NATOM=%li, NRES=%li, NBONH=%li, NBONA=%li\n",N,NRES,NBONH,NBONA);
   /*------------------ READ ATOM NAMES -----------------*/
   while(1)
     {
@@ -585,7 +585,7 @@ void read_pdb(char *label)
   FILE *fp;
   fp = fopen(label,"rt");
   if(fp == NULL){printf("** E ** file %s not found, abort\n", label); exit(1);}
-  printf("Reading PDB file\n");
+  // printf("Reading PDB file\n");
   n=0;
   flag_dec_limit=0;
   flag_end_of_9999_residue=0;
@@ -636,7 +636,7 @@ void read_pdb(char *label)
       if(resSeq[i]!=resSeq[i-1])
 	resSeqN[i]++;
     }
-  printf("NATOM=%li atoms, NRES=%li\n", N, resSeqN[N-1]+1);
+  // printf("NATOM=%li atoms, NRES=%li\n", N, resSeqN[N-1]+1);
 }
 
 
