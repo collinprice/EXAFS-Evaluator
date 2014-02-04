@@ -116,8 +116,8 @@ int getdir (std::string dir, std::vector<std::string> &files)
 int main(int argc, char **argv) {
 	
 	int c;
-	std::string fitness_file, ga_file;
-	while ( (c = getopt(argc, argv, "f:g:")) != -1 ) {
+	std::string fitness_file, ga_file, seed, scratch;
+	while ( (c = getopt(argc, argv, "f:g:s:t:")) != -1 ) {
 
 		switch(c) {
 			case 'f':
@@ -125,6 +125,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'g':
 				ga_file.assign(optarg);
+				break;
+			case 's':
+				seed.assign(optarg);
+				break;
+			case 't':
+				scratch.assign(optarg);
 				break;
 			default:
 				exit(EXIT_FAILURE);
@@ -147,6 +153,9 @@ int main(int argc, char **argv) {
 	if (ga_config.hasKey("seed")) {
             srand(ga_config.getInt("seed"));
             std::cout << "Seed: " << ga_config.getInt("seed") << std::endl;
+    } else if (seed.size() != 0) {
+    		srand(atoi(seed.c_str()));
+    		std::cout << "Seed: " << atoi(seed.c_str()) << std::endl;
     } else {
             time_t inital_seed = time(NULL);
             srand(inital_seed);

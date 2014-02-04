@@ -167,21 +167,19 @@ void EXAFSPSO::initStats() {
 void EXAFSPSO::recordStats() {
 
 	double average_exafs_score = 0;
-	double average_potential_energy_score = 0;
 	double best_score = std::numeric_limits<double>::max();
 	Particle best_chromosome;
 
 	for (std::vector<Particle>::iterator child = this->population.begin(); child != this->population.end(); ++child) {
 		
 		average_exafs_score += child->exafs_score;
-		average_potential_energy_score += child->potential_energy;
 		if (child->exafs_score < best_score) {
 			best_score = child->exafs_score;
 			best_chromosome = *child;
 		}
 	}
 
-	this->output_stream << best_score << "," << (average_exafs_score/(int)this->population.size()) << "," << best_chromosome.potential_energy << "," << (average_potential_energy_score/(int)this->population.size()) << std::endl;
+	this->output_stream << best_score << "," << (average_exafs_score/(int)this->population.size()) << "," << best_chromosome.potential_energy << std::endl;
 }
 
 void EXAFSPSO::finalStats() {
