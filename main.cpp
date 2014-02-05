@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 double unifRand() {
         return rand() / double(RAND_MAX);
@@ -162,9 +163,21 @@ int main(int argc, char **argv) {
             std::cout << "Seed: " << inital_seed << std::endl;
     }
 
-	PDBHelper* pdb_helper = new PDBHelper(fitness_config.getString("pdb-file"), fitness_config.getString("amber-topology-file"), "temp_pdb.pdb", fitness_config.getStringList("exafs-atoms"));
-	IFEFFITHelper* ifeffit_helper = new IFEFFITHelper(fitness_config.getString("folder-name"), pdb_helper->getAllEXAFSAtoms(), fitness_config.getString("target-atom"), fitness_config.getString("experimental-exafs"), fitness_config.getDouble("x-min"), fitness_config.getDouble("x-max"), fitness_config.getString("feff"), fitness_config.getString("ifeffit"));
-	VMDHelper* vmd_helper = new VMDHelper(pdb_helper->output_pdb_file, fitness_config.getString("amber-topology-file"), fitness_config.getString("namd2-path"), fitness_config.getString("vmd-path"));
+    // Create directory for scratch stuff.
+    std::string temp_folder = fitness_config.getString("folder-name") + "/" + seed;
+
+	if (mkdir(temp_folder.c_str(), 0755) != 0){
+		do {
+			temp_folder = temp_folder + "d";
+		} while(mkdir(temp_folder.c_str(), 0755) != 0);
+	}
+
+	PDBHelper* pdb_helper = new PDBHelper(fitness_config.getString("pdb-file"), fitness_config.getString("amber-topology-file"), temp_folder + "/temp_pdb.pdb", fitness_config.getStringList("exafs-atoms"));
+
+	IFEFFITHelper* ifeffit_helper = new IFEFFITHelper(temp_folder, pdb_helper->getAllEXAFSAtoms(), fitness_config.getString("target-atom"), fitness_config.getString("experimental-exafs"), fitness_config.getDouble("x-min"), fitness_config.getDouble("x-max"), fitness_config.getString("feff"), fitness_config.getString("ifeffit"));
+	// IFEFFITHelper* ifeffit_helper = new IFEFFITHelper(fitness_config.getString("folder-name"), pdb_helper->getAllEXAFSAtoms(), fitness_config.getString("target-atom"), fitness_config.getString("experimental-exafs"), fitness_config.getDouble("x-min"), fitness_config.getDouble("x-max"), fitness_config.getString("feff"), fitness_config.getString("ifeffit"));
+
+	VMDHelper* vmd_helper = new VMDHelper(temp_folder, pdb_helper->output_pdb_file, fitness_config.getString("amber-topology-file"), fitness_config.getString("namd2-path"), fitness_config.getString("vmd-path"));
 	EXAFSEvaluator* exafs_evaluator = new EXAFSEvaluator(ifeffit_helper, pdb_helper, vmd_helper);
 
 	if (ga_config.getString("eval-type").compare("solo") == 0) {
@@ -172,6 +185,9 @@ int main(int argc, char **argv) {
 		std::cout << "Initial pdb file" << std::endl;
 	 	double initial_rmsd = ifeffit_helper->run(pdb_helper->getEXAFSAtoms(), true);
 	 	std::cout << "RMSD = " << initial_rmsd << std::endl;
+
+	 	pdb_helper->writePDBFile();
+		std::cout << "Energy: " << vmd_helper->calculateEnergy() << std::endl;
 
 	} else if (ga_config.getString("eval-type").compare("dir_potential") == 0) {
 		std::cout << "Directory Potential" << std::endl;

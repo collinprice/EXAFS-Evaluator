@@ -56,10 +56,8 @@ IFEFFITHelper::IFEFFITHelper(std::string folder_name,
 		"feff6 > /dev/null",
 		ifeffit_path + " -q process.iff"
 	};
-
-	// Create directory to contain all directories/files needed for ifeffit calculation.
+	
 	this->folder_name = folder_name;
-	mkdir(folder_name.c_str(), 0755);
 
 	int target_atom_atomic_number = PDBAtom::atomicSymbolToNumber(target_atom);
 

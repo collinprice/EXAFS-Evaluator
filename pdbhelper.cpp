@@ -80,27 +80,6 @@ void PDBHelper::updateEXAFSAtoms(std::vector<PDBAtom> atoms) {
 	}
 }
 
-// void PDBHelper::updateAtomsFromXYZ(std::string filename, bool onlyEXAFS) {
-
-// 	std::ifstream xyz_file(filename.c_str());
-// 	std::string x,y,z;
-
-// 	int index = -1;
-// 	while(xyz_file.good()) {
-
-// 		xyz_file >> x >> y >> z;
-// 		++index;
-
-// 		if (onlyEXAFS && occupancy[index] != 1) continue;
-
-// 		X[index] = atof(x.c_str());
-// 		Y[index] = atof(y.c_str());
-// 		Z[index] = atof(z.c_str());		
-// 	}
-
-// 	xyz_file.close();
-// }
-
 void PDBHelper::updateEXAFSAtomsFromXYZ(std::vector<PDBAtom> atoms) {
 
 	if ((int)atoms.size() != N) {
@@ -130,19 +109,6 @@ void PDBHelper::updateAllAtomsFromXYZ(std::vector<PDBAtom> atoms) {
 		Z[i] = atoms[i].z;
 	}
 }
-
-// void PDBHelper::updateAtomsFromList(std::vector<PDBAtom> atoms) {
-
-// 	for (std::vector<PDBAtom>::iterator atom = atoms.begin(); atom != atoms.end(); ++atom) {
-		
-// 		if (occupancy[atom->getIndex()] == 1) {
-
-// 			X[atom->getIndex()] = atom->x;
-// 			Y[atom->getIndex()] = atom->y;
-// 			Z[atom->getIndex()] = atom->z;
-// 		}
-// 	}
-// }
 
 void PDBHelper::writePDBFile(std::string filename) {
 	write_one_pdb(C_TEXT(filename));
