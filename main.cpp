@@ -520,5 +520,7 @@ int main(int argc, char **argv) {
 		dcd_results.close();
 	}
 
+	system(("rm -rf " + temp_folder).c_str());
+
 	return 0;
 }

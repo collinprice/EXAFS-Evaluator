@@ -118,7 +118,7 @@ void EXAFSPSO::evaluate( Particle& child ) {
 	child.exafs_score = this->exafs_evaluator->calculateRMSD();
 	child.exafs_data = this->exafs_evaluator->getEXAFSData();
 
-	// child.potential_energy = this->exafs_evaluator->calculatePotentialEnergy();
+	child.potential_energy = this->exafs_evaluator->calculatePotentialEnergy();
 }
 
 Particle EXAFSPSO::best_particle() {
